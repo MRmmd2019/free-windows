@@ -1,4 +1,4 @@
-name: Windows Cloud PC
+name: 🖥️ Windows Cloud PC
 
 on:
   workflow_dispatch:
@@ -7,14 +7,13 @@ permissions:
   contents: read
 
 jobs:
+
   cloud-pc:
-    name: Windows Cloud PC
+
+    name: 🖥️ Windows Cloud PC
     runs-on: windows-latest
 
     timeout-minutes: 360
-
-    env:
-      TS_TAG: tag:cloud-pc
 
     steps:
 
@@ -22,67 +21,99 @@ jobs:
       # 1. SYSTEM INFORMATION
       # ============================================================
 
-      - name: 1. System Information
+      - name: "1️⃣ 🖥️ System Information"
         shell: pwsh
         run: |
+
           $ErrorActionPreference = 'Stop'
 
-          $cloudPcStartUtc = [DateTimeOffset]::UtcNow
-
-          "CLOUD_PC_START_UTC=$($cloudPcStartUtc.ToString('o'))" |
-            Out-File `
-              -FilePath $env:GITHUB_ENV `
-              -Encoding utf8 `
-              -Append
-
-          Write-Host "==============================================="
-          Write-Host " WINDOWS CLOUD PC"
-          Write-Host "==============================================="
+          Write-Host ""
+          Write-Host "╔══════════════════════════════════════════════════════════════╗"
+          Write-Host "║              🖥️ WINDOWS CLOUD PC                           ║"
+          Write-Host "║              🔍 SYSTEM INFORMATION                         ║"
+          Write-Host "╚══════════════════════════════════════════════════════════════╝"
           Write-Host ""
 
-          Write-Host "Cloud PC start time (UTC):"
-          Write-Host "  $($cloudPcStartUtc.ToString('o'))"
-          Write-Host ""
+          try {
 
-          Write-Host "Windows:"
+            $cloudPcStartUtc = [DateTimeOffset]::UtcNow
 
-          Get-ComputerInfo |
-            Select-Object `
-              WindowsProductName,
-              WindowsVersion,
-              OsBuildNumber,
-              CsProcessors,
-              CsTotalPhysicalMemory |
-            Format-List
+            "CLOUD_PC_START_UTC=$($cloudPcStartUtc.ToString('o'))" |
+              Out-File `
+                -FilePath $env:GITHUB_ENV `
+                -Encoding utf8 `
+                -Append
 
-          Write-Host ""
-          Write-Host "PowerShell:"
-          $PSVersionTable
+            Write-Host "🕐 Cloud PC start time (UTC):"
+            Write-Host "   $($cloudPcStartUtc.ToString('o'))"
+            Write-Host ""
 
-          Write-Host ""
-          Write-Host "Disk:"
+            Write-Host "🪟 Windows information:"
+            Write-Host ""
 
-          Get-Volume |
-            Where-Object DriveLetter |
-            Select-Object `
-              DriveLetter,
-              FileSystemLabel,
-              FileSystem,
-              SizeRemaining,
-              Size |
-            Format-Table -AutoSize
+            $computerInfo = Get-ComputerInfo |
+              Select-Object `
+                WindowsProductName,
+                WindowsVersion,
+                OsBuildNumber,
+                CsProcessors,
+                CsTotalPhysicalMemory
+
+            $computerInfo | Format-List
+
+            Write-Host ""
+            Write-Host "⚙️ PowerShell:"
+            Write-Host "   Version: $($PSVersionTable.PSVersion)"
+            Write-Host ""
+
+            Write-Host "💾 Disk information:"
+            Write-Host ""
+
+            Get-Volume |
+              Where-Object DriveLetter |
+              Select-Object `
+                DriveLetter,
+                FileSystemLabel,
+                FileSystem,
+                SizeRemaining,
+                Size |
+              Format-Table -AutoSize
+
+            Write-Host ""
+            Write-Host "✅ System information collected successfully."
+            Write-Host ""
+
+          }
+          catch {
+
+            Write-Host ""
+            Write-Host "❌ ERROR: Failed to collect system information."
+            Write-Host "📄 Details:"
+            Write-Host "   $($_.Exception.Message)"
+            Write-Host ""
+
+            throw
+          }
 
 
       # ============================================================
       # 2. GENERATE RDP CREDENTIALS
       # ============================================================
 
-      - name: 2. Generate RDP Credentials
+      - name: "2️⃣ 🔐 Generate RDP Credentials"
         shell: pwsh
         run: |
+
           $ErrorActionPreference = 'Stop'
 
+          Write-Host ""
+          Write-Host "╔══════════════════════════════════════════════════════════════╗"
+          Write-Host "║              🔐 RDP CREDENTIAL GENERATION                  ║"
+          Write-Host "╚══════════════════════════════════════════════════════════════╝"
+          Write-Host ""
+
           function Get-RandomChar {
+
             param(
               [Parameter(Mandatory)]
               [string]$Characters
@@ -140,580 +171,708 @@ jobs:
           }
 
 
-          $username = New-RandomUsername
-          $password = New-RandomPassword
+          try {
 
+            Write-Host "🔄 Generating random RDP username..."
+            $username = New-RandomUsername
 
-          Write-Output "::add-mask::$username"
-          Write-Output "::add-mask::$password"
+            Write-Host "✅ Username generated."
+            Write-Host ""
 
+            Write-Host "🔄 Generating secure random RDP password..."
+            $password = New-RandomPassword
 
-          "RDP_USERNAME=$username" |
-            Out-File `
-              -FilePath $env:GITHUB_ENV `
-              -Encoding utf8 `
-              -Append
+            Write-Host "✅ Password generated."
+            Write-Host ""
 
-          "RDP_PASSWORD=$password" |
-            Out-File `
-              -FilePath $env:GITHUB_ENV `
-              -Encoding utf8 `
-              -Append
+            "RDP_USERNAME=$username" |
+              Out-File `
+                -FilePath $env:GITHUB_ENV `
+                -Encoding utf8 `
+                -Append
 
+            "RDP_PASSWORD=$password" |
+              Out-File `
+                -FilePath $env:GITHUB_ENV `
+                -Encoding utf8 `
+                -Append
 
-          Write-Host ""
-          Write-Host "RDP credentials generated successfully."
-          Write-Host "Credentials are masked in GitHub logs."
-          Write-Host ""
+            Write-Host "╔══════════════════════════════════════════════════════════════╗"
+            Write-Host "║                  🔐 RDP LOGIN INFORMATION                  ║"
+            Write-Host "╠══════════════════════════════════════════════════════════════╣"
+            Write-Host "║                                                              ║"
+            Write-Host "║  👤 Username: $username"
+            Write-Host "║                                                              ║"
+            Write-Host "║  🔑 Password: $password"
+            Write-Host "║                                                              ║"
+            Write-Host "╚══════════════════════════════════════════════════════════════╝"
+            Write-Host ""
+
+            Write-Host "⚠️ IMPORTANT:"
+            Write-Host "   These credentials are intentionally visible in the log."
+            Write-Host "   Use them only for this temporary Cloud PC."
+            Write-Host ""
+
+            Write-Host "✅ RDP credentials are ready."
+
+          }
+          catch {
+
+            Write-Host ""
+            Write-Host "❌ ERROR: Failed to generate RDP credentials."
+            Write-Host "📄 Details:"
+            Write-Host "   $($_.Exception.Message)"
+            Write-Host ""
+
+            throw
+          }
 
 
       # ============================================================
       # 3. ENABLE REMOTE DESKTOP
       # ============================================================
 
-      - name: 3. Enable Remote Desktop
+      - name: "3️⃣ 🖥️ Enable Remote Desktop"
         shell: pwsh
         run: |
+
           $ErrorActionPreference = 'Stop'
 
-          Write-Host "Enabling Remote Desktop..."
+          Write-Host ""
+          Write-Host "╔══════════════════════════════════════════════════════════════╗"
+          Write-Host "║                 🖥️ REMOTE DESKTOP (RDP)                   ║"
+          Write-Host "╚══════════════════════════════════════════════════════════════╝"
+          Write-Host ""
 
+          try {
 
-          Set-ItemProperty `
-            -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' `
-            -Name 'fDenyTSConnections' `
-            -Value 0
+            Write-Host "🔄 Enabling Remote Desktop connections..."
 
+            Set-ItemProperty `
+              -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' `
+              -Name 'fDenyTSConnections' `
+              -Value 0
 
-          Set-ItemProperty `
-            -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' `
-            -Name 'UserAuthentication' `
-            -Value 1
+            Write-Host "   ✅ RDP connections enabled."
 
+            Write-Host "🔄 Configuring RDP authentication..."
 
-          Set-Service `
-            -Name 'TermService' `
-            -StartupType Automatic
+            Set-ItemProperty `
+              -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' `
+              -Name 'UserAuthentication' `
+              -Value 1
 
+            Write-Host "   ✅ Network Level Authentication enabled."
 
-          Start-Service `
-            -Name 'TermService' `
-            -ErrorAction SilentlyContinue
+            Write-Host "🔄 Configuring Remote Desktop service..."
 
+            Set-Service `
+              -Name 'TermService' `
+              -StartupType Automatic
 
-          $service = Get-Service `
-            -Name 'TermService' `
-            -ErrorAction SilentlyContinue
+            Start-Service `
+              -Name 'TermService' `
+              -ErrorAction SilentlyContinue
 
+            Write-Host "   ✅ Remote Desktop service started."
 
-          if (
-            $null -eq $service -or
-            $service.Status -ne 'Running'
-          ) {
-            throw "Remote Desktop service is not running."
+            $service = Get-Service `
+              -Name 'TermService' `
+              -ErrorAction SilentlyContinue
+
+            if (
+              $null -eq $service -or
+              $service.Status -ne 'Running'
+            ) {
+
+              throw "Remote Desktop service is not running."
+            }
+
+            Write-Host ""
+            Write-Host "✅ Remote Desktop is fully enabled."
+            Write-Host ""
+
           }
+          catch {
 
+            Write-Host ""
+            Write-Host "❌ ERROR: Could not enable Remote Desktop."
+            Write-Host "📄 Details:"
+            Write-Host "   $($_.Exception.Message)"
+            Write-Host ""
 
-          Write-Host "Remote Desktop enabled."
+            throw
+          }
 
 
       # ============================================================
       # 4. CREATE LOCAL ADMINISTRATOR
       # ============================================================
 
-      - name: 4. Create RDP Administrator
+      - name: "4️⃣ 👤 Create RDP Administrator"
         shell: pwsh
         run: |
+
           $ErrorActionPreference = 'Stop'
 
-          $username = $env:RDP_USERNAME
-          $password = $env:RDP_PASSWORD
+          Write-Host ""
+          Write-Host "╔══════════════════════════════════════════════════════════════╗"
+          Write-Host "║                👤 RDP USER CONFIGURATION                   ║"
+          Write-Host "╚══════════════════════════════════════════════════════════════╝"
+          Write-Host ""
 
+          try {
 
-          if (-not $username -or -not $password) {
-            throw "RDP credentials are missing."
-          }
+            $username = $env:RDP_USERNAME
+            $password = $env:RDP_PASSWORD
 
+            if (-not $username -or -not $password) {
+              throw "RDP credentials are missing from the environment."
+            }
 
-          $securePassword = ConvertTo-SecureString `
-            $password `
-            -AsPlainText `
-            -Force
+            Write-Host "👤 Username:"
+            Write-Host "   $username"
+            Write-Host ""
 
+            Write-Host "🔄 Creating local Windows account..."
 
-          $existingUser = Get-LocalUser `
-            -Name $username `
-            -ErrorAction SilentlyContinue
+            $securePassword = ConvertTo-SecureString `
+              $password `
+              -AsPlainText `
+              -Force
 
-
-          if (-not $existingUser) {
-
-            Write-Host "Creating local administrator..."
-
-            New-LocalUser `
+            $existingUser = Get-LocalUser `
               -Name $username `
-              -Password $securePassword `
-              -FullName 'Cloud PC Administrator' `
-              -Description 'Temporary Windows Cloud PC administrator' `
-              -PasswordNeverExpires `
-              -AccountNeverExpires |
-              Out-Null
+              -ErrorAction SilentlyContinue
 
-          }
-          else {
+            if (-not $existingUser) {
 
-            Write-Host "User already exists."
+              New-LocalUser `
+                -Name $username `
+                -Password $securePassword `
+                -FullName 'Cloud PC Administrator' `
+                -Description 'Temporary Windows Cloud PC administrator' `
+                -PasswordNeverExpires `
+                -AccountNeverExpires |
+                Out-Null
 
-            Set-LocalUser `
-              -Name $username `
-              -Password $securePassword
-          }
+              Write-Host "   ✅ Local user created."
 
+            }
+            else {
 
-          $localUser = Get-LocalUser `
-            -Name $username `
-            -ErrorAction Stop
+              Write-Host "   ℹ️ User already exists."
+              Write-Host "   🔄 Updating password..."
 
-          $userSid = $localUser.SID.Value
+              Set-LocalUser `
+                -Name $username `
+                -Password $securePassword
 
-
-          $adminMember = Get-LocalGroupMember `
-            -Group 'Administrators' `
-            -ErrorAction SilentlyContinue |
-            Where-Object {
-              $_.SID.Value -eq $userSid
+              Write-Host "   ✅ Password updated."
             }
 
 
-          if (-not $adminMember) {
+            $localUser = Get-LocalUser `
+              -Name $username `
+              -ErrorAction Stop
 
-            Add-LocalGroupMember `
+            $userSid = $localUser.SID.Value
+
+
+            Write-Host ""
+            Write-Host "🔄 Checking Administrators group..."
+
+            $adminMember = Get-LocalGroupMember `
               -Group 'Administrators' `
-              -Member $username `
-              -ErrorAction Stop
-          }
+              -ErrorAction SilentlyContinue |
+              Where-Object {
+                $_.SID.Value -eq $userSid
+              }
 
+            if (-not $adminMember) {
 
-          $rdpMember = Get-LocalGroupMember `
-            -Group 'Remote Desktop Users' `
-            -ErrorAction SilentlyContinue |
-            Where-Object {
-              $_.SID.Value -eq $userSid
+              Add-LocalGroupMember `
+                -Group 'Administrators' `
+                -Member $username `
+                -ErrorAction Stop
+
+              Write-Host "   ✅ User added to Administrators."
+
+            }
+            else {
+
+              Write-Host "   ✅ User is already an Administrator."
             }
 
 
-          if (-not $rdpMember) {
+            Write-Host ""
+            Write-Host "🔄 Checking Remote Desktop Users group..."
 
-            Add-LocalGroupMember `
+            $rdpMember = Get-LocalGroupMember `
               -Group 'Remote Desktop Users' `
-              -Member $username `
-              -ErrorAction Stop
+              -ErrorAction SilentlyContinue |
+              Where-Object {
+                $_.SID.Value -eq $userSid
+              }
+
+            if (-not $rdpMember) {
+
+              Add-LocalGroupMember `
+                -Group 'Remote Desktop Users' `
+                -Member $username `
+                -ErrorAction Stop
+
+              Write-Host "   ✅ User added to Remote Desktop Users."
+
+            }
+            else {
+
+              Write-Host "   ✅ User is already in Remote Desktop Users."
+            }
+
+
+            $userCheck = Get-LocalUser `
+              -Name $username `
+              -ErrorAction SilentlyContinue
+
+            if (-not $userCheck) {
+              throw "RDP user creation failed."
+            }
+
+            Write-Host ""
+            Write-Host "╔══════════════════════════════════════════════════════════════╗"
+            Write-Host "║              ✅ RDP USER READY                              ║"
+            Write-Host "╚══════════════════════════════════════════════════════════════╝"
+            Write-Host ""
+
           }
+          catch {
 
+            Write-Host ""
+            Write-Host "❌ ERROR: Failed to configure RDP administrator."
+            Write-Host "📄 Details:"
+            Write-Host "   $($_.Exception.Message)"
+            Write-Host ""
 
-          $userCheck = Get-LocalUser `
-            -Name $username `
-            -ErrorAction SilentlyContinue
-
-
-          if (-not $userCheck) {
-            throw "RDP user creation failed."
+            throw
           }
-
-
-          Write-Host ""
-          Write-Host "RDP administrator is ready."
-          Write-Host ""
 
 
       # ============================================================
       # 5. CONNECT TAILSCALE
       # ============================================================
 
-      - name: 5. Connect Tailscale
+      - name: "5️⃣ 🟦 Connect Tailscale"
         uses: tailscale/github-action@v4
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
           version: latest
+          log-mode: normal
 
 
       # ============================================================
-      # 6. DETECT TAILSCALE INTERFACE + IPv4
+      # 6. DETECT TAILSCALE
       # ============================================================
 
-      - name: 6. Detect Tailscale Network
+      - name: "6️⃣ 🌐 Detect Tailscale Network"
         shell: pwsh
         run: |
+
           $ErrorActionPreference = 'Stop'
 
+          Write-Host ""
+          Write-Host "╔══════════════════════════════════════════════════════════════╗"
+          Write-Host "║                 🌐 TAILSCALE NETWORK                       ║"
+          Write-Host "╚══════════════════════════════════════════════════════════════╝"
+          Write-Host ""
 
-          $tailscale = Join-Path `
-            $env:ProgramFiles `
-            'Tailscale\tailscale.exe'
+          try {
 
+            $tailscale = Join-Path `
+              $env:ProgramFiles `
+              'Tailscale\tailscale.exe'
 
-          if (-not (Test-Path $tailscale)) {
-            throw "Tailscale executable was not found."
-          }
+            if (-not (Test-Path $tailscale)) {
+              throw "Tailscale executable was not found."
+            }
 
+            Write-Host "✅ Tailscale executable found."
+            Write-Host ""
 
-          Write-Host "Waiting for Tailscale network..."
+            Write-Host "🔄 Waiting for Tailscale network..."
 
-
-          $tsIp = $null
-          $tailscaleAdapter = $null
-
-
-          for ($i = 1; $i -le 30; $i++) {
-
-            $result = & $tailscale ip -4 2>$null
-
-
-            $candidate = $result |
-              Where-Object {
-                $_ -match '^100\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}$'
-              } |
-              Select-Object -First 1
+            $tsIp = $null
+            $tailscaleAdapter = $null
 
 
-            if ($candidate) {
-              $tsIp = $candidate.Trim()
+            for ($i = 1; $i -le 30; $i++) {
+
+              Write-Host ""
+              Write-Host "   🔄 Attempt $i / 30"
+
+              $result = & $tailscale ip -4 2>$null
+
+              $candidate = $result |
+                Where-Object {
+                  $_ -match '^100\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}$'
+                } |
+                Select-Object -First 1
+
+              if ($candidate) {
+                $tsIp = $candidate.Trim()
+                Write-Host "   ✅ Tailscale IPv4 detected: $tsIp"
+              }
+
+              $tailscaleAdapter = Get-NetAdapter `
+                -ErrorAction SilentlyContinue |
+                Where-Object {
+
+                  $_.Status -eq 'Up' -and (
+                    $_.Name -match '(?i)tailscale' -or
+                    $_.InterfaceDescription -match '(?i)tailscale'
+                  )
+
+                } |
+                Select-Object -First 1
+
+              if ($tailscaleAdapter) {
+                Write-Host "   ✅ Tailscale network adapter detected."
+                Write-Host "      Name: $($tailscaleAdapter.Name)"
+                Write-Host "      Index: $($tailscaleAdapter.ifIndex)"
+              }
+
+              if ($tsIp -and $tailscaleAdapter) {
+                break
+              }
+
+              Write-Host "   ⏳ Network is not ready yet..."
+              Start-Sleep -Seconds 2
             }
 
 
-            $tailscaleAdapter = Get-NetAdapter `
+            if (-not $tailscaleAdapter) {
+              throw "No active Tailscale network interface was found."
+            }
+
+            if (-not $tsIp) {
+              throw "Could not obtain Tailscale IPv4 address."
+            }
+
+
+            if (
+              $tsIp -notmatch
+              '^100\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}$'
+            ) {
+              throw "Unexpected Tailscale IPv4 address: $tsIp"
+            }
+
+
+            $interfaceIp = Get-NetIPAddress `
+              -InterfaceIndex $tailscaleAdapter.ifIndex `
+              -AddressFamily IPv4 `
               -ErrorAction SilentlyContinue |
               Where-Object {
+                $_.IPAddress -eq $tsIp
+              }
 
-                $_.Status -eq 'Up' -and (
-                  $_.Name -match '(?i)tailscale' -or
-                  $_.InterfaceDescription -match '(?i)tailscale'
-                )
+            if (-not $interfaceIp) {
 
-              } |
-              Select-Object -First 1
-
-
-            if ($tsIp -and $tailscaleAdapter) {
-              break
+              throw `
+                "Tailscale IPv4 is not assigned to the detected Tailscale interface."
             }
 
 
-            Write-Host (
-              "Tailscale network not ready. Attempt {0}/30..." -f $i
-            )
+            $tsInterfaceAlias = $tailscaleAdapter.Name
+            $tsInterfaceIndex = $tailscaleAdapter.ifIndex
 
-            Start-Sleep -Seconds 2
+
+            "TAILSCALE_INTERFACE=$tsInterfaceAlias" |
+              Out-File `
+                -FilePath $env:GITHUB_ENV `
+                -Encoding utf8 `
+                -Append
+
+            "TAILSCALE_INTERFACE_INDEX=$tsInterfaceIndex" |
+              Out-File `
+                -FilePath $env:GITHUB_ENV `
+                -Encoding utf8 `
+                -Append
+
+            "TAILSCALE_IP=$tsIp" |
+              Out-File `
+                -FilePath $env:GITHUB_ENV `
+                -Encoding utf8 `
+                -Append
+
+
+            Write-Host ""
+            Write-Host "╔══════════════════════════════════════════════════════════════╗"
+            Write-Host "║              ✅ TAILSCALE CONNECTED                        ║"
+            Write-Host "╠══════════════════════════════════════════════════════════════╣"
+            Write-Host "║ 🌐 IPv4      : $tsIp"
+            Write-Host "║ 🔌 Interface  : $tsInterfaceAlias"
+            Write-Host "║ 🔢 Index      : $tsInterfaceIndex"
+            Write-Host "╚══════════════════════════════════════════════════════════════╝"
+            Write-Host ""
+
           }
+          catch {
 
+            Write-Host ""
+            Write-Host "❌ ERROR: Tailscale network detection failed."
+            Write-Host "📄 Details:"
+            Write-Host "   $($_.Exception.Message)"
+            Write-Host ""
 
-          if (-not $tailscaleAdapter) {
-            throw "No active Tailscale network interface was found."
+            throw
           }
-
-
-          if (-not $tsIp) {
-            throw "Could not obtain Tailscale IPv4 address."
-          }
-
-
-          if (
-            $tsIp -notmatch
-            '^100\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}$'
-          ) {
-            throw "Unexpected Tailscale IPv4 address: $tsIp"
-          }
-
-
-          $interfaceIp = Get-NetIPAddress `
-            -InterfaceIndex $tailscaleAdapter.ifIndex `
-            -AddressFamily IPv4 `
-            -ErrorAction SilentlyContinue |
-            Where-Object {
-              $_.IPAddress -eq $tsIp
-            }
-
-
-          if (-not $interfaceIp) {
-            throw `
-              "Tailscale IPv4 is not assigned to the detected Tailscale interface."
-          }
-
-
-          $tsInterfaceAlias = $tailscaleAdapter.Name
-          $tsInterfaceIndex = $tailscaleAdapter.ifIndex
-
-
-          Write-Host ""
-          Write-Host "Tailscale interface:"
-          Write-Host "  Name        : $tsInterfaceAlias"
-          Write-Host "  Index       : $tsInterfaceIndex"
-          Write-Host "  Description : $($tailscaleAdapter.InterfaceDescription)"
-          Write-Host ""
-          Write-Host "Tailscale IPv4:"
-          Write-Host "  $tsIp"
-          Write-Host ""
-
-
-          "TAILSCALE_INTERFACE=$tsInterfaceAlias" |
-            Out-File `
-              -FilePath $env:GITHUB_ENV `
-              -Encoding utf8 `
-              -Append
-
-          "TAILSCALE_INTERFACE_INDEX=$tsInterfaceIndex" |
-            Out-File `
-              -FilePath $env:GITHUB_ENV `
-              -Encoding utf8 `
-              -Append
-
-          "TAILSCALE_IP=$tsIp" |
-            Out-File `
-              -FilePath $env:GITHUB_ENV `
-              -Encoding utf8 `
-              -Append
 
 
       # ============================================================
       # 7. CONFIGURE RDP FIREWALL
       # ============================================================
 
-      - name: 7. Configure RDP Firewall
+      - name: "7️⃣ 🛡️ Configure RDP Firewall"
         shell: pwsh
         run: |
+
           $ErrorActionPreference = 'Stop'
 
-
-          if (-not $env:TAILSCALE_INTERFACE) {
-            throw "TAILSCALE_INTERFACE is missing."
-          }
-
-
-          if (-not $env:TAILSCALE_IP) {
-            throw "TAILSCALE_IP is missing."
-          }
-
-
-          Write-Host "Configuring Windows Firewall..."
           Write-Host ""
-          Write-Host "Tailscale interface:"
-          Write-Host "  $env:TAILSCALE_INTERFACE"
-          Write-Host ""
-          Write-Host "Tailscale IPv4:"
-          Write-Host "  $env:TAILSCALE_IP"
+          Write-Host "╔══════════════════════════════════════════════════════════════╗"
+          Write-Host "║                 🛡️ WINDOWS FIREWALL                       ║"
+          Write-Host "╚══════════════════════════════════════════════════════════════╝"
           Write-Host ""
 
+          try {
 
-          $adapter = Get-NetAdapter `
-            -Name $env:TAILSCALE_INTERFACE `
-            -ErrorAction SilentlyContinue
+            if (-not $env:TAILSCALE_INTERFACE) {
+              throw "TAILSCALE_INTERFACE is missing."
+            }
 
-
-          if (
-            $null -eq $adapter -or
-            $adapter.Status -ne 'Up'
-          ) {
-            throw "Tailscale interface is not active."
-          }
-
-
-          $interfaceIp = Get-NetIPAddress `
-            -InterfaceIndex $adapter.ifIndex `
-            -AddressFamily IPv4 `
-            -ErrorAction SilentlyContinue |
-            Where-Object {
-              $_.IPAddress -eq $env:TAILSCALE_IP
+            if (-not $env:TAILSCALE_IP) {
+              throw "TAILSCALE_IP is missing."
             }
 
 
-          if (-not $interfaceIp) {
-            throw "Tailscale IPv4 is not assigned to the selected interface."
-          }
+            Write-Host "🌐 Tailscale interface:"
+            Write-Host "   $env:TAILSCALE_INTERFACE"
+            Write-Host ""
+
+            Write-Host "🌐 Tailscale IPv4:"
+            Write-Host "   $env:TAILSCALE_IP"
+            Write-Host ""
 
 
-          Disable-NetFirewallRule `
-            -DisplayGroup 'Remote Desktop' `
-            -ErrorAction SilentlyContinue
+            $adapter = Get-NetAdapter `
+              -Name $env:TAILSCALE_INTERFACE `
+              -ErrorAction SilentlyContinue
+
+            if (
+              $null -eq $adapter -or
+              $adapter.Status -ne 'Up'
+            ) {
+              throw "Tailscale interface is not active."
+            }
+
+            Write-Host "✅ Tailscale interface is active."
+            Write-Host ""
 
 
-          @(
-            'Cloud PC - RDP via Tailscale - TCP'
-            'Cloud PC - RDP via Tailscale - UDP'
-          ) |
-          ForEach-Object {
+            Write-Host "🔄 Verifying Tailscale IP..."
 
-            Get-NetFirewallRule `
-              -DisplayName $_ `
+            $interfaceIp = Get-NetIPAddress `
+              -InterfaceIndex $adapter.ifIndex `
+              -AddressFamily IPv4 `
               -ErrorAction SilentlyContinue |
-              Remove-NetFirewallRule `
-                -ErrorAction SilentlyContinue
+              Where-Object {
+                $_.IPAddress -eq $env:TAILSCALE_IP
+              }
+
+            if (-not $interfaceIp) {
+              throw "Tailscale IPv4 is not assigned to the selected interface."
+            }
+
+            Write-Host "   ✅ Tailscale IP is correctly assigned."
+            Write-Host ""
+
+
+            Write-Host "🔄 Disabling Windows default Remote Desktop firewall rules..."
+
+            Disable-NetFirewallRule `
+              -DisplayGroup 'Remote Desktop' `
+              -ErrorAction SilentlyContinue
+
+            Write-Host "   ✅ Default RDP firewall rules processed."
+            Write-Host ""
+
+
+            Write-Host "🔄 Removing old Cloud PC firewall rules..."
+
+            @(
+              'Cloud PC - RDP via Tailscale - TCP'
+              'Cloud PC - RDP via Tailscale - UDP'
+            ) |
+            ForEach-Object {
+
+              Get-NetFirewallRule `
+                -DisplayName $_ `
+                -ErrorAction SilentlyContinue |
+                Remove-NetFirewallRule `
+                  -ErrorAction SilentlyContinue
+            }
+
+            Write-Host "   ✅ Old rules removed."
+            Write-Host ""
+
+
+            Write-Host "🔄 Creating TCP/3389 Tailscale firewall rule..."
+
+            New-NetFirewallRule `
+              -DisplayName 'Cloud PC - RDP via Tailscale - TCP' `
+              -Direction Inbound `
+              -Protocol TCP `
+              -LocalPort 3389 `
+              -Action Allow `
+              -Profile Any `
+              -RemoteAddress '100.64.0.0/10' `
+              -InterfaceAlias $env:TAILSCALE_INTERFACE |
+              Out-Null
+
+            Write-Host "   ✅ TCP/3389 rule created."
+            Write-Host ""
+
+
+            Write-Host "🔄 Creating UDP/3389 Tailscale firewall rule..."
+
+            New-NetFirewallRule `
+              -DisplayName 'Cloud PC - RDP via Tailscale - UDP' `
+              -Direction Inbound `
+              -Protocol UDP `
+              -LocalPort 3389 `
+              -Action Allow `
+              -Profile Any `
+              -RemoteAddress '100.64.0.0/10' `
+              -InterfaceAlias $env:TAILSCALE_INTERFACE |
+              Out-Null
+
+            Write-Host "   ✅ UDP/3389 rule created."
+            Write-Host ""
+
+
+            $tcpRule = Get-NetFirewallRule `
+              -DisplayName 'Cloud PC - RDP via Tailscale - TCP' `
+              -ErrorAction SilentlyContinue
+
+            if (
+              $null -eq $tcpRule -or
+              $tcpRule.Enabled -ne $true -or
+              $tcpRule.Action -ne 'Allow'
+            ) {
+              throw "TCP firewall rule validation failed."
+            }
+
+
+            $udpRule = Get-NetFirewallRule `
+              -DisplayName 'Cloud PC - RDP via Tailscale - UDP' `
+              -ErrorAction SilentlyContinue
+
+            if (
+              $null -eq $udpRule -or
+              $udpRule.Enabled -ne $true -or
+              $udpRule.Action -ne 'Allow'
+            ) {
+              throw "UDP firewall rule validation failed."
+            }
+
+
+            Write-Host "╔══════════════════════════════════════════════════════════════╗"
+            Write-Host "║                ✅ FIREWALL READY                           ║"
+            Write-Host "╠══════════════════════════════════════════════════════════════╣"
+            Write-Host "║ 🔵 TCP 3389  → Allowed via Tailscale"
+            Write-Host "║ 🟣 UDP 3389  → Allowed via Tailscale"
+            Write-Host "║ 🌐 Source    → 100.64.0.0/10"
+            Write-Host "║ 🔌 Interface → $env:TAILSCALE_INTERFACE"
+            Write-Host "╚══════════════════════════════════════════════════════════════╝"
+            Write-Host ""
+
           }
+          catch {
 
+            Write-Host ""
+            Write-Host "❌ ERROR: Windows Firewall configuration failed."
+            Write-Host "📄 Details:"
+            Write-Host "   $($_.Exception.Message)"
+            Write-Host ""
 
-          New-NetFirewallRule `
-            -DisplayName 'Cloud PC - RDP via Tailscale - TCP' `
-            -Direction Inbound `
-            -Protocol TCP `
-            -LocalPort 3389 `
-            -Action Allow `
-            -Profile Any `
-            -RemoteAddress '100.64.0.0/10' `
-            -InterfaceAlias $env:TAILSCALE_INTERFACE |
-            Out-Null
-
-
-          New-NetFirewallRule `
-            -DisplayName 'Cloud PC - RDP via Tailscale - UDP' `
-            -Direction Inbound `
-            -Protocol UDP `
-            -LocalPort 3389 `
-            -Action Allow `
-            -Profile Any `
-            -RemoteAddress '100.64.0.0/10' `
-            -InterfaceAlias $env:TAILSCALE_INTERFACE |
-            Out-Null
-
-
-          $tcpRule = Get-NetFirewallRule `
-            -DisplayName 'Cloud PC - RDP via Tailscale - TCP' `
-            -ErrorAction SilentlyContinue
-
-
-          if (
-            $null -eq $tcpRule -or
-            $tcpRule.Enabled -ne $true -or
-            $tcpRule.Action -ne 'Allow'
-          ) {
-            throw "Tailscale RDP TCP firewall rule is invalid."
+            throw
           }
-
-
-          $udpRule = Get-NetFirewallRule `
-            -DisplayName 'Cloud PC - RDP via Tailscale - UDP' `
-            -ErrorAction SilentlyContinue
-
-
-          if (
-            $null -eq $udpRule -or
-            $udpRule.Enabled -ne $true -or
-            $udpRule.Action -ne 'Allow'
-          ) {
-            throw "Tailscale RDP UDP firewall rule is invalid."
-          }
-
-
-          $tcpFilter = $tcpRule |
-            Get-NetFirewallPortFilter
-
-
-          $udpFilter = $udpRule |
-            Get-NetFirewallPortFilter
-
-
-          if (
-            $tcpFilter.Protocol -ne 'TCP' -or
-            $tcpFilter.LocalPort -notcontains '3389'
-          ) {
-            throw "TCP firewall rule has unexpected port/protocol."
-          }
-
-
-          if (
-            $udpFilter.Protocol -ne 'UDP' -or
-            $udpFilter.LocalPort -notcontains '3389'
-          ) {
-            throw "UDP firewall rule has unexpected port/protocol."
-          }
-
-
-          $tcpInterfaceFilter = $tcpRule |
-            Get-NetFirewallInterfaceFilter
-
-
-          $udpInterfaceFilter = $udpRule |
-            Get-NetFirewallInterfaceFilter
-
-
-          if (
-            $tcpInterfaceFilter.InterfaceAlias -notcontains
-            $env:TAILSCALE_INTERFACE
-          ) {
-            throw "TCP firewall rule is not restricted to Tailscale interface."
-          }
-
-
-          if (
-            $udpInterfaceFilter.InterfaceAlias -notcontains
-            $env:TAILSCALE_INTERFACE
-          ) {
-            throw "UDP firewall rule is not restricted to Tailscale interface."
-          }
-
-
-          Write-Host ""
-          Write-Host "RDP firewall configured successfully."
-          Write-Host ""
-          Write-Host "TCP/3389 -> Tailscale interface only"
-          Write-Host "UDP/3389 -> Tailscale interface only"
-          Write-Host "Allowed source -> 100.64.0.0/10"
-          Write-Host "Interface       -> $env:TAILSCALE_INTERFACE"
 
 
       # ============================================================
       # 8. FINAL SYSTEM VERIFICATION
       # ============================================================
 
-      - name: 8. Final System Verification
+      - name: "8️⃣ 🔎 Final System Verification"
         shell: pwsh
         run: |
+
           $ErrorActionPreference = 'Stop'
+
+          Write-Host ""
+          Write-Host "╔══════════════════════════════════════════════════════════════╗"
+          Write-Host "║                 🔎 FINAL SYSTEM CHECK                       ║"
+          Write-Host "╚══════════════════════════════════════════════════════════════╝"
+          Write-Host ""
 
           $errors = @()
 
 
           function Check-Component {
+
             param(
               [string]$Name,
               [bool]$Condition
             )
 
             if ($Condition) {
-              Write-Host "[OK]   $Name"
+
+              Write-Host "   ✅ $Name"
+
             }
             else {
-              Write-Host "[FAIL] $Name"
+
+              Write-Host "   ❌ $Name"
               $script:errors += $Name
             }
           }
 
 
-          Write-Host ""
-          Write-Host "==============================================="
-          Write-Host " FINAL SYSTEM CHECK"
-          Write-Host "==============================================="
-          Write-Host ""
-
+          Write-Host "🖥️ Remote Desktop"
+          Write-Host "────────────────────────────────────────"
 
           $rdpService = Get-Service `
             -Name 'TermService' `
             -ErrorAction SilentlyContinue
 
-
           Check-Component `
-            'Remote Desktop service' `
+            'Remote Desktop service is running' `
             (
               $null -ne $rdpService -and
               $rdpService.Status -eq 'Running'
             )
 
 
+          Write-Host ""
+          Write-Host "👤 RDP Account"
+          Write-Host "────────────────────────────────────────"
+
           $rdpUser = Get-LocalUser `
             -Name $env:RDP_USERNAME `
             -ErrorAction SilentlyContinue
 
-
           Check-Component `
-            'RDP administrator' `
+            'RDP administrator exists' `
             ($null -ne $rdpUser)
 
 
@@ -739,9 +898,8 @@ jobs:
             Select-Object -First 1
           }
 
-
           Check-Component `
-            'Administrator group membership' `
+            'User belongs to Administrators' `
             ($null -ne $adminMembership)
 
 
@@ -760,19 +918,21 @@ jobs:
             Select-Object -First 1
           }
 
-
           Check-Component `
-            'Remote Desktop Users membership' `
+            'User belongs to Remote Desktop Users' `
             ($null -ne $rdpMembership)
 
+
+          Write-Host ""
+          Write-Host "🌐 Tailscale"
+          Write-Host "────────────────────────────────────────"
 
           $tailscale = Join-Path `
             $env:ProgramFiles `
             'Tailscale\tailscale.exe'
 
-
           Check-Component `
-            'Tailscale executable' `
+            'Tailscale executable exists' `
             (Test-Path $tailscale)
 
 
@@ -780,9 +940,8 @@ jobs:
             -Name $env:TAILSCALE_INTERFACE `
             -ErrorAction SilentlyContinue
 
-
           Check-Component `
-            'Tailscale network interface' `
+            'Tailscale network interface is UP' `
             (
               $null -ne $tsAdapter -and
               $tsAdapter.Status -eq 'Up'
@@ -793,9 +952,8 @@ jobs:
             $env:TAILSCALE_IP -match `
             '^100\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}$'
 
-
           Check-Component `
-            'Tailscale IPv4' `
+            'Tailscale IPv4 is valid' `
             $tsIpValid
 
 
@@ -815,16 +973,18 @@ jobs:
             )
           }
 
-
           Check-Component `
-            'Tailscale IPv4 assigned to interface' `
+            'Tailscale IPv4 is assigned to interface' `
             $interfaceIpValid
 
+
+          Write-Host ""
+          Write-Host "🛡️ Firewall"
+          Write-Host "────────────────────────────────────────"
 
           $tcpRule = Get-NetFirewallRule `
             -DisplayName 'Cloud PC - RDP via Tailscale - TCP' `
             -ErrorAction SilentlyContinue
-
 
           $tcpValid = (
             $null -ne $tcpRule -and
@@ -832,9 +992,8 @@ jobs:
             $tcpRule.Action -eq 'Allow'
           )
 
-
           Check-Component `
-            'Tailscale RDP TCP firewall rule' `
+            'TCP/3389 firewall rule is enabled' `
             $tcpValid
 
 
@@ -842,51 +1001,65 @@ jobs:
             -DisplayName 'Cloud PC - RDP via Tailscale - UDP' `
             -ErrorAction SilentlyContinue
 
-
           $udpValid = (
             $null -ne $udpRule -and
             $udpRule.Enabled -eq $true -and
             $udpRule.Action -eq 'Allow'
           )
 
-
           Check-Component `
-            'Tailscale RDP UDP firewall rule' `
+            'UDP/3389 firewall rule is enabled' `
             $udpValid
 
+
+          Write-Host ""
+          Write-Host "🔌 RDP Listener"
+          Write-Host "────────────────────────────────────────"
 
           $rdpListening = Get-NetTCPConnection `
             -LocalPort 3389 `
             -State Listen `
             -ErrorAction SilentlyContinue
 
-
           Check-Component `
-            'RDP TCP/3389 listener' `
+            'TCP/3389 is listening' `
             ($null -ne $rdpListening)
 
 
           Write-Host ""
-          Write-Host "==============================================="
-
+          Write-Host "══════════════════════════════════════════════════════════════"
 
           if ($errors.Count -gt 0) {
 
             Write-Host ""
-            Write-Host "SYSTEM CHECK FAILED:"
+            Write-Host "❌ FINAL CHECK FAILED"
+            Write-Host ""
+            Write-Host "The following components have problems:"
             Write-Host ""
 
             $errors |
               ForEach-Object {
-                Write-Host " - $_"
+                Write-Host "   ❌ $_"
               }
 
-            throw "Cloud PC setup failed."
+            Write-Host ""
+            Write-Host "🛑 Cloud PC will NOT be marked as ready."
+            Write-Host ""
+
+            throw "Cloud PC final verification failed."
           }
 
 
           Write-Host ""
-          Write-Host "All required components are ready."
+          Write-Host "🎉 ALL SYSTEM CHECKS PASSED!"
+          Write-Host ""
+          Write-Host "✅ Windows"
+          Write-Host "✅ Remote Desktop"
+          Write-Host "✅ RDP Administrator"
+          Write-Host "✅ Tailscale"
+          Write-Host "✅ Tailscale IPv4"
+          Write-Host "✅ Firewall"
+          Write-Host "✅ TCP/3389 listener"
           Write-Host ""
 
 
@@ -894,64 +1067,98 @@ jobs:
       # 9. CLOUD PC READY
       # ============================================================
 
-      - name: 9. Cloud PC Ready
+      - name: "9️⃣ 🚀 Cloud PC Ready"
         shell: pwsh
         run: |
-          Write-Host ""
-          Write-Host "=============================================================="
-          Write-Host "                  WINDOWS CLOUD PC READY"
-          Write-Host "=============================================================="
-          Write-Host ""
-
-          Write-Host "Tailscale IP       : $env:TAILSCALE_IP"
-          Write-Host "Tailscale Interface: $env:TAILSCALE_INTERFACE"
-
-          Write-Host "Username           : $env:RDP_USERNAME"
-          Write-Host "Password           : $env:RDP_PASSWORD"
 
           Write-Host ""
-          Write-Host "RDP target:"
-          Write-Host "  $env:TAILSCALE_IP"
-
-          Write-Host ""
-          Write-Host "RDP port:"
-          Write-Host "  3389 TCP + UDP"
-
-          Write-Host ""
-          Write-Host "Connect from Windows using:"
-          Write-Host "  mstsc.exe"
-
-          Write-Host ""
-          Write-Host "Environment:"
-          Write-Host "  [OK] Windows"
-          Write-Host "  [OK] Remote Desktop"
-          Write-Host "  [OK] Local Administrator"
-          Write-Host "  [OK] Tailscale"
-          Write-Host "  [OK] Tailscale-only RDP TCP Firewall"
-          Write-Host "  [OK] Tailscale-only RDP UDP Firewall"
-
-          Write-Host ""
-          Write-Host "No additional applications were installed."
-          Write-Host "Install required software manually after connecting."
+          Write-Host "╔══════════════════════════════════════════════════════════════╗"
+          Write-Host "║                                                              ║"
+          Write-Host "║              🚀 WINDOWS CLOUD PC READY 🚀                  ║"
+          Write-Host "║                                                              ║"
+          Write-Host "╚══════════════════════════════════════════════════════════════╝"
           Write-Host ""
 
-          Write-Host "=============================================================="
+          Write-Host "🎉 Your Cloud PC is ready!"
+          Write-Host ""
+
+
+          Write-Host "╔══════════════════════════════════════════════════════════════╗"
+          Write-Host "║                    🌐 CONNECTION                           ║"
+          Write-Host "╠══════════════════════════════════════════════════════════════╣"
+          Write-Host "║                                                              ║"
+          Write-Host "║  🌐 Tailscale IP : $env:TAILSCALE_IP"
+          Write-Host "║  🔌 RDP Port     : 3389"
+          Write-Host "║                                                              ║"
+          Write-Host "║  👤 Username     : $env:RDP_USERNAME"
+          Write-Host "║  🔑 Password     : $env:RDP_PASSWORD"
+          Write-Host "║                                                              ║"
+          Write-Host "╚══════════════════════════════════════════════════════════════╝"
+          Write-Host ""
+
+
+          Write-Host "🪟 HOW TO CONNECT FROM WINDOWS"
+          Write-Host "──────────────────────────────────────────────────────────────"
+          Write-Host ""
+          Write-Host "1️⃣ Press:"
+          Write-Host "   Win + R"
+          Write-Host ""
+          Write-Host "2️⃣ Type:"
+          Write-Host "   mstsc"
+          Write-Host ""
+          Write-Host "3️⃣ Enter this PC address:"
+          Write-Host "   $env:TAILSCALE_IP"
+          Write-Host ""
+          Write-Host "4️⃣ Enter the username:"
+          Write-Host "   $env:RDP_USERNAME"
+          Write-Host ""
+          Write-Host "5️⃣ Enter the password:"
+          Write-Host "   $env:RDP_PASSWORD"
+          Write-Host ""
+
+
+          Write-Host "📋 CONNECTION SUMMARY"
+          Write-Host "──────────────────────────────────────────────────────────────"
+          Write-Host ""
+          Write-Host "🖥️ Operating System : Windows"
+          Write-Host "🌐 Network          : Tailscale"
+          Write-Host "📡 Tailscale IP     : $env:TAILSCALE_IP"
+          Write-Host "🔌 RDP Port         : 3389"
+          Write-Host "🔐 Protocol         : RDP"
+          Write-Host "👤 Account          : Local Administrator"
+          Write-Host "🛡️ Firewall         : Tailscale only"
+          Write-Host ""
+
+
+          Write-Host "⚠️ IMPORTANT"
+          Write-Host "──────────────────────────────────────────────────────────────"
+          Write-Host ""
+          Write-Host "• Keep this GitHub Actions tab open."
+          Write-Host "• The Cloud PC exists only while this workflow is running."
+          Write-Host "• If the workflow stops, the Cloud PC will disappear."
+          Write-Host "• Do not restart the Windows machine manually."
+          Write-Host ""
+
+
+          Write-Host "🚀 Cloud PC is now ready for use."
+          Write-Host ""
 
 
       # ============================================================
       # 10. KEEP CLOUD PC ALIVE
       # ============================================================
 
-      - name: 10. Keep Cloud PC Alive
+      - name: "🔟 ⏱️ Keep Cloud PC Alive"
         shell: pwsh
         run: |
+
           $ErrorActionPreference = 'Stop'
 
-
           Write-Host ""
-          Write-Host "Cloud PC is running."
+          Write-Host "╔══════════════════════════════════════════════════════════════╗"
+          Write-Host "║                 ⏱️ CLOUD PC KEEP-ALIVE                      ║"
+          Write-Host "╚══════════════════════════════════════════════════════════════╝"
           Write-Host ""
-
 
           $jobTimeoutMinutes = 360
           $safetyMarginMinutes = 15
@@ -1015,37 +1222,35 @@ jobs:
           }
 
 
-          Write-Host "Cloud PC start (UTC):"
-          Write-Host "  $($jobStart.ToString('o'))"
-
+          Write-Host "🟢 Cloud PC is running."
           Write-Host ""
-          Write-Host "Current time (UTC):"
-          Write-Host "  $($now.ToString('o'))"
 
+          Write-Host "🕐 Start time (UTC):"
+          Write-Host "   $($jobStart.ToString('o'))"
           Write-Host ""
-          Write-Host "Job timeout:"
-          Write-Host "  $jobTimeoutMinutes minutes"
 
+          Write-Host "⏱️ GitHub Actions timeout:"
+          Write-Host "   $jobTimeoutMinutes minutes"
           Write-Host ""
-          Write-Host "Safety margin:"
-          Write-Host "  $safetyMarginMinutes minutes"
 
+          Write-Host "🛡️ Safety margin:"
+          Write-Host "   $safetyMarginMinutes minutes"
           Write-Host ""
-          Write-Host "Maximum total runtime:"
-          Write-Host "  $maximumRuntimeMinutes minutes"
 
+          Write-Host "⌛ Maximum runtime:"
+          Write-Host "   $maximumRuntimeMinutes minutes"
           Write-Host ""
-          Write-Host "Elapsed setup/runtime:"
-          Write-Host "  $([math]::Round($elapsed.TotalMinutes, 1)) minutes"
 
+          Write-Host "📊 Already elapsed:"
+          Write-Host "   $([math]::Round($elapsed.TotalMinutes, 1)) minutes"
           Write-Host ""
-          Write-Host "Cloud PC deadline (UTC):"
-          Write-Host "  $($deadline.ToString('o'))"
 
+          Write-Host "🏁 Planned deadline (UTC):"
+          Write-Host "   $($deadline.ToString('o'))"
           Write-Host ""
-          Write-Host "Remaining:"
-          Write-Host "  $([math]::Round($remaining.TotalMinutes, 1)) minutes"
 
+          Write-Host "⏳ Remaining:"
+          Write-Host "   $([math]::Round($remaining.TotalMinutes, 1)) minutes"
           Write-Host ""
 
 
@@ -1054,10 +1259,8 @@ jobs:
             $current =
               [DateTimeOffset]::UtcNow
 
-
             $remaining =
               $deadline - $current
-
 
             if ($remaining.TotalSeconds -le 0) {
               break
@@ -1069,7 +1272,7 @@ jobs:
 
 
             Write-Host (
-              "[{0}] Cloud PC running | Elapsed: {1} | Remaining: {2}" -f `
+              "🟢 [{0}] Cloud PC RUNNING | ⏱️ Elapsed: {1} | ⏳ Remaining: {2}" -f `
               $current.ToString('yyyy-MM-dd HH:mm:ss'),
               $elapsed.ToString('dd\:hh\:mm\:ss'),
               $remaining.ToString('dd\:hh\:mm\:ss')
@@ -1093,6 +1296,11 @@ jobs:
 
 
           Write-Host ""
-          Write-Host "Keep-alive period completed."
-          Write-Host "15-minute safety margin preserved."
-          Write-Host "GitHub Actions job is ending normally."
+          Write-Host "╔══════════════════════════════════════════════════════════════╗"
+          Write-Host "║                  ⏰ SESSION FINISHED                        ║"
+          Write-Host "╚══════════════════════════════════════════════════════════════╝"
+          Write-Host ""
+          Write-Host "ℹ️ Keep-alive period completed."
+          Write-Host "🛡️ 15-minute safety margin was preserved."
+          Write-Host "🏁 GitHub Actions job is ending."
+          Write-Host ""
