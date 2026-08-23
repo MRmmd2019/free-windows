@@ -4,7 +4,6 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write
   contents: read
 
 jobs:
@@ -145,7 +144,6 @@ jobs:
           $password = New-RandomPassword
 
 
-          # Mask credentials in GitHub Actions logs.
           Write-Output "::add-mask::$username"
           Write-Output "::add-mask::$password"
 
@@ -243,10 +241,6 @@ jobs:
             -Force
 
 
-          # ----------------------------------------------------------
-          # Create or update user.
-          # ----------------------------------------------------------
-
           $existingUser = Get-LocalUser `
             -Name $username `
             -ErrorAction SilentlyContinue
@@ -276,20 +270,12 @@ jobs:
           }
 
 
-          # ----------------------------------------------------------
-          # Obtain user SID.
-          # ----------------------------------------------------------
-
           $localUser = Get-LocalUser `
             -Name $username `
             -ErrorAction Stop
 
           $userSid = $localUser.SID.Value
 
-
-          # ----------------------------------------------------------
-          # Administrators membership.
-          # ----------------------------------------------------------
 
           $adminMember = Get-LocalGroupMember `
             -Group 'Administrators' `
@@ -308,10 +294,6 @@ jobs:
           }
 
 
-          # ----------------------------------------------------------
-          # Remote Desktop Users membership.
-          # ----------------------------------------------------------
-
           $rdpMember = Get-LocalGroupMember `
             -Group 'Remote Desktop Users' `
             -ErrorAction SilentlyContinue |
@@ -328,10 +310,6 @@ jobs:
               -ErrorAction Stop
           }
 
-
-          # ----------------------------------------------------------
-          # Verify user.
-          # ----------------------------------------------------------
 
           $userCheck = Get-LocalUser `
             -Name $username `
@@ -355,9 +333,7 @@ jobs:
       - name: 5. Connect Tailscale
         uses: tailscale/github-action@v4
         with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          audience: ${{ secrets.TS_AUDIENCE }}
-          tags: ${{ env.TS_TAG }}
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
           version: latest
 
 
@@ -390,10 +366,6 @@ jobs:
 
           for ($i = 1; $i -le 30; $i++) {
 
-            # --------------------------------------------------------
-            # Get Tailscale IPv4.
-            # --------------------------------------------------------
-
             $result = & $tailscale ip -4 2>$null
 
 
@@ -408,10 +380,6 @@ jobs:
               $tsIp = $candidate.Trim()
             }
 
-
-            # --------------------------------------------------------
-            # Find active Tailscale adapter.
-            # --------------------------------------------------------
 
             $tailscaleAdapter = Get-NetAdapter `
               -ErrorAction SilentlyContinue |
@@ -457,11 +425,6 @@ jobs:
           }
 
 
-          # ----------------------------------------------------------
-          # Verify that the Tailscale IPv4 exists on the detected
-          # interface.
-          # ----------------------------------------------------------
-
           $interfaceIp = Get-NetIPAddress `
             -InterfaceIndex $tailscaleAdapter.ifIndex `
             -AddressFamily IPv4 `
@@ -498,13 +461,11 @@ jobs:
               -Encoding utf8 `
               -Append
 
-
           "TAILSCALE_INTERFACE_INDEX=$tsInterfaceIndex" |
             Out-File `
               -FilePath $env:GITHUB_ENV `
               -Encoding utf8 `
               -Append
-
 
           "TAILSCALE_IP=$tsIp" |
             Out-File `
@@ -543,10 +504,6 @@ jobs:
           Write-Host ""
 
 
-          # ----------------------------------------------------------
-          # Verify Tailscale interface.
-          # ----------------------------------------------------------
-
           $adapter = Get-NetAdapter `
             -Name $env:TAILSCALE_INTERFACE `
             -ErrorAction SilentlyContinue
@@ -559,10 +516,6 @@ jobs:
             throw "Tailscale interface is not active."
           }
 
-
-          # ----------------------------------------------------------
-          # Verify Tailscale IP belongs to this interface.
-          # ----------------------------------------------------------
 
           $interfaceIp = Get-NetIPAddress `
             -InterfaceIndex $adapter.ifIndex `
@@ -578,18 +531,10 @@ jobs:
           }
 
 
-          # ----------------------------------------------------------
-          # Disable Windows' broad Remote Desktop rules.
-          # ----------------------------------------------------------
-
           Disable-NetFirewallRule `
             -DisplayGroup 'Remote Desktop' `
             -ErrorAction SilentlyContinue
 
-
-          # ----------------------------------------------------------
-          # Remove our previous custom rules.
-          # ----------------------------------------------------------
 
           @(
             'Cloud PC - RDP via Tailscale - TCP'
@@ -605,10 +550,6 @@ jobs:
           }
 
 
-          # ----------------------------------------------------------
-          # TCP 3389.
-          # ----------------------------------------------------------
-
           New-NetFirewallRule `
             -DisplayName 'Cloud PC - RDP via Tailscale - TCP' `
             -Direction Inbound `
@@ -621,10 +562,6 @@ jobs:
             Out-Null
 
 
-          # ----------------------------------------------------------
-          # UDP 3389.
-          # ----------------------------------------------------------
-
           New-NetFirewallRule `
             -DisplayName 'Cloud PC - RDP via Tailscale - UDP' `
             -Direction Inbound `
@@ -636,10 +573,6 @@ jobs:
             -InterfaceAlias $env:TAILSCALE_INTERFACE |
             Out-Null
 
-
-          # ----------------------------------------------------------
-          # Verify TCP rule.
-          # ----------------------------------------------------------
 
           $tcpRule = Get-NetFirewallRule `
             -DisplayName 'Cloud PC - RDP via Tailscale - TCP' `
@@ -655,10 +588,6 @@ jobs:
           }
 
 
-          # ----------------------------------------------------------
-          # Verify UDP rule.
-          # ----------------------------------------------------------
-
           $udpRule = Get-NetFirewallRule `
             -DisplayName 'Cloud PC - RDP via Tailscale - UDP' `
             -ErrorAction SilentlyContinue
@@ -672,10 +601,6 @@ jobs:
             throw "Tailscale RDP UDP firewall rule is invalid."
           }
 
-
-          # ----------------------------------------------------------
-          # Verify port filters.
-          # ----------------------------------------------------------
 
           $tcpFilter = $tcpRule |
             Get-NetFirewallPortFilter
@@ -700,10 +625,6 @@ jobs:
             throw "UDP firewall rule has unexpected port/protocol."
           }
 
-
-          # ----------------------------------------------------------
-          # Verify interface filters.
-          # ----------------------------------------------------------
 
           $tcpInterfaceFilter = $tcpRule |
             Get-NetFirewallInterfaceFilter
@@ -773,10 +694,6 @@ jobs:
           Write-Host ""
 
 
-          # ----------------------------------------------------------
-          # RDP SERVICE
-          # ----------------------------------------------------------
-
           $rdpService = Get-Service `
             -Name 'TermService' `
             -ErrorAction SilentlyContinue
@@ -790,10 +707,6 @@ jobs:
             )
 
 
-          # ----------------------------------------------------------
-          # RDP USER
-          # ----------------------------------------------------------
-
           $rdpUser = Get-LocalUser `
             -Name $env:RDP_USERNAME `
             -ErrorAction SilentlyContinue
@@ -803,10 +716,6 @@ jobs:
             'RDP administrator' `
             ($null -ne $rdpUser)
 
-
-          # ----------------------------------------------------------
-          # GROUP MEMBERSHIP BY SID
-          # ----------------------------------------------------------
 
           $userSid = $null
 
@@ -857,10 +766,6 @@ jobs:
             ($null -ne $rdpMembership)
 
 
-          # ----------------------------------------------------------
-          # TAILSCALE EXECUTABLE
-          # ----------------------------------------------------------
-
           $tailscale = Join-Path `
             $env:ProgramFiles `
             'Tailscale\tailscale.exe'
@@ -870,10 +775,6 @@ jobs:
             'Tailscale executable' `
             (Test-Path $tailscale)
 
-
-          # ----------------------------------------------------------
-          # TAILSCALE INTERFACE
-          # ----------------------------------------------------------
 
           $tsAdapter = Get-NetAdapter `
             -Name $env:TAILSCALE_INTERFACE `
@@ -888,10 +789,6 @@ jobs:
             )
 
 
-          # ----------------------------------------------------------
-          # TAILSCALE IPv4
-          # ----------------------------------------------------------
-
           $tsIpValid =
             $env:TAILSCALE_IP -match `
             '^100\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}$'
@@ -901,10 +798,6 @@ jobs:
             'Tailscale IPv4' `
             $tsIpValid
 
-
-          # ----------------------------------------------------------
-          # VERIFY IP ON INTERFACE
-          # ----------------------------------------------------------
 
           $interfaceIpValid = $false
 
@@ -928,10 +821,6 @@ jobs:
             $interfaceIpValid
 
 
-          # ----------------------------------------------------------
-          # TCP FIREWALL RULE
-          # ----------------------------------------------------------
-
           $tcpRule = Get-NetFirewallRule `
             -DisplayName 'Cloud PC - RDP via Tailscale - TCP' `
             -ErrorAction SilentlyContinue
@@ -948,10 +837,6 @@ jobs:
             'Tailscale RDP TCP firewall rule' `
             $tcpValid
 
-
-          # ----------------------------------------------------------
-          # UDP FIREWALL RULE
-          # ----------------------------------------------------------
 
           $udpRule = Get-NetFirewallRule `
             -DisplayName 'Cloud PC - RDP via Tailscale - UDP' `
@@ -970,10 +855,6 @@ jobs:
             $udpValid
 
 
-          # ----------------------------------------------------------
-          # RDP TCP LISTENER
-          # ----------------------------------------------------------
-
           $rdpListening = Get-NetTCPConnection `
             -LocalPort 3389 `
             -State Listen `
@@ -984,10 +865,6 @@ jobs:
             'RDP TCP/3389 listener' `
             ($null -ne $rdpListening)
 
-
-          # ----------------------------------------------------------
-          # FINAL RESULT
-          # ----------------------------------------------------------
 
           Write-Host ""
           Write-Host "==============================================="
@@ -1029,7 +906,6 @@ jobs:
           Write-Host "Tailscale IP       : $env:TAILSCALE_IP"
           Write-Host "Tailscale Interface: $env:TAILSCALE_INTERFACE"
 
-          # GitHub masks these values.
           Write-Host "Username           : $env:RDP_USERNAME"
           Write-Host "Password           : $env:RDP_PASSWORD"
 
@@ -1077,21 +953,6 @@ jobs:
           Write-Host ""
 
 
-          # ----------------------------------------------------------
-          # Runtime policy.
-          #
-          # GitHub Actions timeout:
-          #   360 minutes
-          #
-          # Safety margin:
-          #   15 minutes
-          #
-          # Maximum total workflow runtime target:
-          #   345 minutes
-          #
-          # The timer started in step 1, so all setup time is included.
-          # ----------------------------------------------------------
-
           $jobTimeoutMinutes = 360
           $safetyMarginMinutes = 15
 
@@ -1103,10 +964,6 @@ jobs:
             throw "Invalid runtime configuration."
           }
 
-
-          # ----------------------------------------------------------
-          # Recover global start timestamp.
-          # ----------------------------------------------------------
 
           if (-not $env:CLOUD_PC_START_UTC) {
             throw "Cloud PC start timestamp is missing."
@@ -1129,10 +986,6 @@ jobs:
             )
           }
 
-
-          # ----------------------------------------------------------
-          # Calculate global deadline.
-          # ----------------------------------------------------------
 
           $deadline =
             $jobStart.AddMinutes(
@@ -1196,10 +1049,6 @@ jobs:
           Write-Host ""
 
 
-          # ----------------------------------------------------------
-          # Keep runner alive until global deadline.
-          # ----------------------------------------------------------
-
           while ($true) {
 
             $current =
@@ -1227,7 +1076,6 @@ jobs:
             )
 
 
-            # Never sleep beyond the calculated deadline.
             $sleepSeconds = [int][math]::Min(
               60,
               [math]::Max(
