@@ -4,14 +4,22 @@ name: 🎮 Playit Agent
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
 
   playit:
 
-    name: 🎮 Setup Playit Agent
+    name: 🎮 Playit Agent
     runs-on: ubuntu-latest
 
+    # GitHub Actions maximum job lifetime.
+    # We intentionally stop Playit before this limit.
     timeout-minutes: 360
+
+    env:
+      PLAYIT_LOG: debug
 
     steps:
 
@@ -22,39 +30,76 @@ jobs:
       - name: "1️⃣ 🖥️ System Information"
         shell: bash
         run: |
-          set -e
+          set -Eeuo pipefail
 
           echo ""
-          echo "=================================================="
-          echo "PLAYIT AGENT RUNNER"
-          echo "=================================================="
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║                  🖥️ PLAYIT AGENT RUNNER                    ║"
+          echo "║                    SYSTEM INFORMATION                      ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
           echo ""
 
-          echo "OS:"
+          echo "📅 UTC:"
+          date -u
+          echo ""
+
+          echo "🐧 Operating System:"
           cat /etc/os-release
-
           echo ""
-          echo "Kernel:"
+
+          echo "🧠 Kernel:"
           uname -a
-
           echo ""
-          echo "CPU:"
-          nproc
+
+          echo "🏗️ Architecture:"
+          uname -m
+          echo ""
+
+          echo "⚙️ CPU:"
+          echo "──────────────────────────────────────────────────────────────"
+          lscpu || true
+          echo ""
+
+          echo "🧮 CPU SUMMARY:"
           lscpu | grep -E \
-            'Model name|Socket|Core|Thread' \
+            'Architecture|CPU\(s\)|Model name|Thread|Core|Socket|Virtualization|Flags' \
             || true
-
           echo ""
-          echo "MEMORY:"
+
+          echo "🧠 MEMORY:"
+          echo "──────────────────────────────────────────────────────────────"
           free -h
-
           echo ""
-          echo "DISK:"
+
+          echo "💾 FILESYSTEM:"
+          echo "──────────────────────────────────────────────────────────────"
           df -h
-
           echo ""
-          echo "NETWORK:"
-          ip addr || true
+
+          echo "💿 BLOCK DEVICES:"
+          echo "──────────────────────────────────────────────────────────────"
+          lsblk || true
+          echo ""
+
+          echo "🌐 NETWORK INTERFACES:"
+          echo "──────────────────────────────────────────────────────────────"
+          ip -br addr || true
+          echo ""
+
+          echo "🛣️ ROUTING TABLE:"
+          echo "──────────────────────────────────────────────────────────────"
+          ip route || true
+          echo ""
+
+          echo "🔌 DNS CONFIGURATION:"
+          echo "──────────────────────────────────────────────────────────────"
+          resolvectl status 2>/dev/null || cat /etc/resolv.conf || true
+          echo ""
+
+          echo "=============================================================="
+          echo "✅ SYSTEM INFORMATION COMPLETE"
+          echo "=============================================================="
+          echo ""
 
 
       # ============================================================
@@ -64,215 +109,875 @@ jobs:
       - name: "2️⃣ 📦 Install Dependencies"
         shell: bash
         run: |
-          set -e
+          set -Eeuo pipefail
 
           echo ""
-          echo "Installing dependencies..."
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║                    📦 DEPENDENCIES                         ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
 
+          echo "🔄 Updating APT package index..."
           sudo apt-get update
+
+          echo ""
+          echo "📦 Installing diagnostic dependencies..."
 
           sudo apt-get install -y \
             curl \
             ca-certificates \
-            gnupg
+            gnupg \
+            jq \
+            iproute2 \
+            net-tools \
+            dnsutils \
+            procps \
+            lsof
 
           echo ""
-          echo "Dependencies installed."
+          echo "🔎 Verifying utilities..."
+
+          for command in \
+            curl \
+            gpg \
+            jq \
+            ip \
+            ss \
+            dig \
+            free \
+            lsof
+          do
+            echo "   🔍 $command"
+
+            if command -v "$command" >/dev/null 2>&1; then
+              echo "      ✅ $(command -v "$command")"
+            else
+              echo "      ❌ Missing"
+              exit 1
+            fi
+          done
+
+          echo ""
+          echo "=============================================================="
+          echo "✅ DEPENDENCIES READY"
+          echo "=============================================================="
+          echo ""
 
 
       # ============================================================
-      # 3. INSTALL PLAYIT
-      #
-      # Official Playit Ubuntu/Debian repository
+      # 3. CONFIGURE OFFICIAL PLAYIT REPOSITORY
       # ============================================================
 
-      - name: "3️⃣ 🎮 Install Playit"
+      - name: "3️⃣ 🎮 Configure Official Playit Repository"
         shell: bash
         run: |
-          set -e
+          set -Eeuo pipefail
 
           echo ""
-          echo "=================================================="
-          echo "INSTALLING PLAYIT"
-          echo "=================================================="
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║              🎮 PLAYIT OFFICIAL REPOSITORY                 ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
           echo ""
+
+          PLAYIT_KEYRING="/etc/apt/trusted.gpg.d/playit.gpg"
+          PLAYIT_SOURCE="/etc/apt/sources.list.d/playit-cloud.list"
+
+          echo "🔑 Downloading Playit repository signing key..."
 
           curl -SsL \
             https://playit-cloud.github.io/ppa/key.gpg |
             gpg --dearmor |
-            sudo tee /etc/apt/trusted.gpg.d/playit.gpg \
-            >/dev/null
+            sudo tee "$PLAYIT_KEYRING" >/dev/null
+
+          echo "   ✅ Key installed:"
+          echo "      $PLAYIT_KEYRING"
+          echo ""
+
+          echo "📝 Adding Playit repository..."
 
           echo \
-            "deb [signed-by=/etc/apt/trusted.gpg.d/playit.gpg] https://playit-cloud.github.io/ppa/data ./" |
-            sudo tee /etc/apt/sources.list.d/playit-cloud.list \
-            >/dev/null
+            "deb [signed-by=$PLAYIT_KEYRING] https://playit-cloud.github.io/ppa/data ./" |
+            sudo tee "$PLAYIT_SOURCE" >/dev/null
+
+          echo "   ✅ Repository configured:"
+          echo "      $PLAYIT_SOURCE"
+          echo ""
+
+          echo "🔄 Updating package index..."
 
           sudo apt-get update
+
+          echo ""
+          echo "🔎 Playit package policy:"
+          apt-cache policy playit || true
+
+          echo ""
+          echo "=============================================================="
+          echo "✅ PLAYIT REPOSITORY READY"
+          echo "=============================================================="
+          echo ""
+
+
+      # ============================================================
+      # 4. INSTALL PLAYIT
+      # ============================================================
+
+      - name: "4️⃣ 📥 Install Playit Agent"
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║                 📥 PLAYIT INSTALLATION                     ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+
+          echo "📦 Installing Playit..."
 
           sudo apt-get install -y playit
 
           echo ""
-          echo "=================================================="
-          echo "PLAYIT VERSION"
-          echo "=================================================="
+          echo "🎮 Playit version:"
+          playit version
+
           echo ""
+          echo "🔎 Playit executable:"
+          command -v playit
+
+          echo ""
+          echo "🔎 Installed package:"
+          dpkg -s playit | sed -n \
+            -e '/^Package:/p' \
+            -e '/^Version:/p' \
+            -e '/^Architecture:/p' \
+            -e '/^Status:/p'
+
+          echo ""
+          echo "🔎 Playit systemd unit:"
+          systemctl cat playit || true
+
+          echo ""
+          echo "=============================================================="
+          echo "✅ PLAYIT INSTALLATION COMPLETE"
+          echo "=============================================================="
+          echo ""
+
+
+      # ============================================================
+      # 5. VALIDATE GITHUB SECRET
+      # ============================================================
+
+      - name: "5️⃣ 🔐 Validate PLAYIT_SECRET_KEY"
+        shell: bash
+        env:
+          PLAYIT_SECRET_KEY: ${{ secrets.PLAYIT_SECRET_KEY }}
+        run: |
+          set -Eeuo pipefail
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║                  🔐 SECRET VALIDATION                      ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+
+          if [ -z "${PLAYIT_SECRET_KEY:-}" ]; then
+            echo "❌ GitHub Secret PLAYIT_SECRET_KEY is empty or unavailable."
+            echo ""
+            echo "Expected secret name:"
+            echo "   PLAYIT_SECRET_KEY"
+            exit 1
+          fi
+
+          SECRET_LENGTH="${#PLAYIT_SECRET_KEY}"
+
+          echo "🔐 Secret detected."
+          echo ""
+          echo "   Length : ${SECRET_LENGTH} characters"
+          echo "   Value  : [REDACTED]"
+          echo ""
+
+          echo "✅ Secret is available to the workflow."
+          echo ""
+
+          echo "=============================================================="
+          echo "✅ SECRET VALIDATION PASSED"
+          echo "=============================================================="
+          echo ""
+
+
+      # ============================================================
+      # 6. PREPARE OFFICIAL PLAYIT SECRET FILE
+      #
+      # The official systemd service uses:
+      #
+      #   /etc/playit/playit.toml
+      #
+      # and starts playitd with:
+      #
+      #   --secret-path /etc/playit/playit.toml
+      #
+      # The file contains the same format produced by the Playit
+      # agent on Windows:
+      #
+      #   secret_key = "..."
+      #
+      # The actual secret is NEVER printed.
+      # ============================================================
+
+      - name: "6️⃣ 🔐 Configure Playit Agent Secret"
+        shell: bash
+        env:
+          PLAYIT_SECRET_KEY: ${{ secrets.PLAYIT_SECRET_KEY }}
+        run: |
+          set -Eeuo pipefail
+          umask 077
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║              🔐 PLAYIT AGENT AUTHENTICATION                ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+
+          PLAYIT_CONFIG_DIR="/etc/playit"
+          PLAYIT_SECRET_FILE="/etc/playit/playit.toml"
+
+          echo "📁 Preparing Playit configuration directory..."
+
+          sudo install \
+            -d \
+            -m 0750 \
+            "$PLAYIT_CONFIG_DIR"
+
+          echo "   ✅ Directory:"
+          echo "      $PLAYIT_CONFIG_DIR"
+          echo ""
+
+          echo "🔐 Writing secret configuration..."
+
+          sudo bash -c 'printf "%s\n" "secret_key = \"${PLAYIT_SECRET_KEY}\"" > /etc/playit/playit.toml' \
+            <<< ""
+
+          # The previous command intentionally does not expand the
+          # caller's shell environment. Write the file safely below
+          # using Python so the secret is passed without appearing
+          # in the command itself.
+
+          sudo rm -f "$PLAYIT_SECRET_FILE"
+
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          secret = os.environ["PLAYIT_SECRET_KEY"]
+
+          path = Path("/tmp/playit.toml")
+
+          path.write_text(
+              f'secret_key = "{secret}"\n',
+              encoding="utf-8"
+          )
+
+          os.chmod(path, 0o600)
+          PY
+
+          sudo install \
+            -o playit \
+            -g playit \
+            -m 0600 \
+            /tmp/playit.toml \
+            "$PLAYIT_SECRET_FILE"
+
+          rm -f /tmp/playit.toml
+
+          echo ""
+          echo "🔎 Secret file metadata:"
+          sudo stat \
+            -c '   Path      : %n
+             Owner     : %U:%G
+             Permissions: %a
+             Size      : %s bytes' \
+            "$PLAYIT_SECRET_FILE"
+
+          echo ""
+          echo "🔎 Secret file syntax check:"
+
+          if sudo grep -Eq '^secret_key = ".+"' "$PLAYIT_SECRET_FILE"; then
+            echo "   ✅ secret_key entry exists."
+          else
+            echo "   ❌ secret_key entry was not detected."
+            exit 1
+          fi
+
+          echo ""
+          echo "🔐 Secret value:"
+          echo "   [REDACTED]"
+
+          echo ""
+          echo "=============================================================="
+          echo "✅ PLAYIT SECRET CONFIGURED"
+          echo "=============================================================="
+          echo ""
+
+
+      # ============================================================
+      # 7. CONFIGURE PLAYIT SYSTEMD SERVICE
+      #
+      # We keep the official Playit ExecStart intact.
+      # Only PLAYIT_LOG is overridden to obtain detailed logs.
+      # ============================================================
+
+      - name: "7️⃣ ⚙️ Configure Playit systemd Service"
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║              ⚙️ PLAYIT SYSTEMD CONFIGURATION               ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+
+          OVERRIDE_DIR="/etc/systemd/system/playit.service.d"
+          OVERRIDE_FILE="$OVERRIDE_DIR/override.conf"
+
+          echo "📁 Creating systemd override directory..."
+
+          sudo install \
+            -d \
+            -m 0755 \
+            "$OVERRIDE_DIR"
+
+          echo ""
+          echo "📝 Creating Playit logging override..."
+
+          sudo tee "$OVERRIDE_FILE" >/dev/null <<'EOF'
+          [Service]
+          Environment=PLAYIT_LOG=debug
+          EOF
+
+          echo ""
+          echo "🔄 Reloading systemd configuration..."
+
+          sudo systemctl daemon-reload
+
+          echo ""
+          echo "🔎 Final Playit service configuration:"
+          echo "──────────────────────────────────────────────────────────────"
+
+          sudo systemctl cat playit
+
+          echo ""
+          echo "=============================================================="
+          echo "✅ SYSTEMD CONFIGURATION READY"
+          echo "=============================================================="
+          echo ""
+
+
+      # ============================================================
+      # 8. PLAYIT PRE-FLIGHT
+      # ============================================================
+
+      - name: "8️⃣ 🌐 Playit Network Pre-Flight"
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║                  🌐 NETWORK PRE-FLIGHT                     ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+
+          echo "🌍 Public IPv4:"
+          curl \
+            -4 \
+            --fail \
+            --silent \
+            --show-error \
+            --max-time 15 \
+            https://api.ipify.org \
+            || true
+          echo ""
+          echo ""
+
+          echo "🔐 Playit API HTTPS test:"
+          curl \
+            -I \
+            --fail \
+            --silent \
+            --show-error \
+            --max-time 15 \
+            https://api.playit.gg \
+            || true
+          echo ""
+
+          echo "🧭 DNS resolution:"
+          getent hosts api.playit.gg || true
+          echo ""
+
+          echo "🛣️ Route to Playit API:"
+
+          PLAYIT_API_IP="$(
+            getent ahostsv4 api.playit.gg |
+            awk 'NR==1 {print $1}'
+          )"
+
+          if [ -n "$PLAYIT_API_IP" ]; then
+            ip route get "$PLAYIT_API_IP" || true
+          else
+            echo "⚠️ Could not resolve an IPv4 address for api.playit.gg."
+          fi
+
+          echo ""
+          echo "=============================================================="
+          echo "✅ NETWORK PRE-FLIGHT COMPLETE"
+          echo "=============================================================="
+          echo ""
+
+
+      # ============================================================
+      # 9. START PLAYIT
+      #
+      # Official systemd service.
+      # ============================================================
+
+      - name: "9️⃣ 🚀 Start Playit Agent"
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║                  🚀 STARTING PLAYIT AGENT                  ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+
+          echo "🎮 Playit CLI:"
+          playit version
+
+          echo ""
+          echo "🔐 Authentication:"
+          echo "   Source : GitHub Actions Secret"
+          echo "   Name   : PLAYIT_SECRET_KEY"
+          echo "   Value  : [REDACTED]"
+          echo ""
+
+          echo "⚙️ Starting official systemd service..."
+
+          sudo systemctl start playit
+
+          echo ""
+          echo "⏳ Waiting for Playit to initialize..."
+
+          sleep 5
+
+          echo ""
+          echo "📊 Playit service status:"
+          sudo systemctl status playit \
+            --no-pager \
+            --full \
+            || true
+
+          echo ""
+          echo "📜 Recent Playit journal:"
+          sudo journalctl \
+            -u playit \
+            --no-pager \
+            -n 100 \
+            -o short-iso \
+            || true
+
+          echo ""
+          echo "📂 Playit log directory:"
+          sudo ls -lah /var/log/playit 2>/dev/null || true
+
+          echo ""
+          echo "=============================================================="
+          echo "✅ PLAYIT START COMMAND COMPLETED"
+          echo "=============================================================="
+          echo ""
+
+
+      # ============================================================
+      # 10. VERIFY AGENT
+      # ============================================================
+
+      - name: "🔟 🔎 Verify Playit Agent"
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║                    🔎 PLAYIT VERIFICATION                  ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+
+          echo "🎮 CLI status:"
+          playit status || true
+
+          echo ""
+          echo "⚙️ systemd state:"
+
+          if sudo systemctl is-active --quiet playit; then
+            echo "   🟢 Playit service is ACTIVE."
+          else
+            echo "   🔴 Playit service is NOT ACTIVE."
+            echo ""
+            echo "📜 Diagnostic journal:"
+            sudo journalctl \
+              -u playit \
+              --no-pager \
+              -n 200 \
+              -o short-iso \
+              || true
+            exit 1
+          fi
+
+          echo ""
+          echo "🧩 Process tree:"
+          ps aux | grep -i '[p]layit' || true
+
+          echo ""
+          echo "🔌 IPC / sockets:"
+          sudo ss -lxnp | grep -i playit || true
+
+          echo ""
+          echo "🌐 Network sockets:"
+          sudo ss -lntup || true
+
+          echo ""
+          echo "📂 Playit files:"
+          sudo find /etc/playit \
+            -maxdepth 2 \
+            -type f \
+            -printf '   %p\n' \
+            2>/dev/null || true
+
+          echo ""
+          echo "=============================================================="
+          echo "✅ PLAYIT AGENT IS ACTIVE"
+          echo "=============================================================="
+          echo ""
+
+
+      # ============================================================
+      # 11. LONG-RUNNING MONITOR
+      #
+      # The runner is allowed to live for 360 minutes.
+      #
+      # We stop Playit at 340 minutes.
+      #
+      # This leaves approximately 20 minutes of safety margin
+      # before GitHub's hard timeout.
+      # ============================================================
+
+      - name: "1️⃣1️⃣ ⏱️ Playit Runtime Monitor"
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          MAX_RUNTIME_SECONDS=$((340 * 60))
+          CHECK_INTERVAL=30
+
+          START_EPOCH="$(date +%s)"
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║                 ⏱️ PLAYIT RUNTIME MONITOR                  ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+
+          echo "🚀 Playit runtime monitor started."
+          echo ""
+          echo "   Maximum Workflow lifetime : 360 minutes"
+          echo "   Planned Playit shutdown   : 340 minutes"
+          echo "   Safety margin              : 20 minutes"
+          echo ""
+
+          echo "📜 Starting live Playit journal stream..."
+          echo "──────────────────── PLAYIT LIVE LOG ────────────────────────"
+
+          sudo journalctl \
+            -u playit \
+            -f \
+            -o short-iso &
+          JOURNAL_PID=$!
+
+          cleanup() {
+            echo ""
+            echo "🧹 Monitor cleanup..."
+
+            if kill -0 "$JOURNAL_PID" 2>/dev/null; then
+              kill "$JOURNAL_PID" 2>/dev/null || true
+            fi
+
+            wait "$JOURNAL_PID" 2>/dev/null || true
+          }
+
+          trap cleanup EXIT
+
+          while true
+          do
+            NOW_EPOCH="$(date +%s)"
+            ELAPSED="$((NOW_EPOCH - START_EPOCH))"
+
+            ELAPSED_MINUTES="$((ELAPSED / 60))"
+            ELAPSED_SECONDS="$((ELAPSED % 60))"
+
+            REMAINING="$((MAX_RUNTIME_SECONDS - ELAPSED))"
+
+            echo ""
+            echo "──────────────────────────────────────────────────────────────"
+            echo "⏱️ Runtime:"
+            printf '   %02d:%02d elapsed\n' \
+              "$ELAPSED_MINUTES" \
+              "$ELAPSED_SECONDS"
+
+            if [ "$REMAINING" -gt 0 ]; then
+              REMAINING_MINUTES="$((REMAINING / 60))"
+              REMAINING_SECONDS="$((REMAINING % 60))"
+
+              printf '   %02d:%02d until planned shutdown\n' \
+                "$REMAINING_MINUTES" \
+                "$REMAINING_SECONDS"
+            else
+              echo "   🛑 Planned shutdown threshold reached."
+            fi
+
+            echo ""
+            echo "⚙️ Service state:"
+
+            sudo systemctl is-active playit \
+              || true
+
+            echo ""
+            echo "📊 Service status:"
+
+            sudo systemctl status playit \
+              --no-pager \
+              --full \
+              || true
+
+            if ! sudo systemctl is-active --quiet playit; then
+              echo ""
+              echo "❌ Playit service is no longer active."
+              echo ""
+              echo "📜 Last journal entries:"
+              sudo journalctl \
+                -u playit \
+                --no-pager \
+                -n 200 \
+                -o short-iso \
+                || true
+
+              echo ""
+              echo "❌ Playit exited before planned shutdown."
+              exit 1
+            fi
+
+            if [ "$ELAPSED" -ge "$MAX_RUNTIME_SECONDS" ]; then
+              echo ""
+              echo "╔══════════════════════════════════════════════════════════════╗"
+              echo "║              🛑 PLANNED PLAYIT SHUTDOWN                   ║"
+              echo "╚══════════════════════════════════════════════════════════════╝"
+              echo ""
+
+              echo "⏱️ Runtime threshold reached."
+              echo "🧹 Initiating graceful systemd shutdown..."
+
+              sudo systemctl stop playit
+
+              echo ""
+              echo "⏳ Waiting for service termination..."
+
+              for i in $(seq 1 30)
+              do
+                if ! sudo systemctl is-active --quiet playit; then
+                  echo "   ✅ Playit stopped cleanly."
+                  break
+                fi
+
+                echo "   ⏳ Still stopping... ${i}/30"
+                sleep 1
+              done
+
+              if sudo systemctl is-active --quiet playit; then
+                echo ""
+                echo "⚠️ Playit did not stop within the graceful shutdown window."
+                echo "🛑 Sending systemd SIGTERM again..."
+
+                sudo systemctl stop playit || true
+                sleep 3
+              fi
+
+              echo ""
+              echo "📊 Final service state:"
+              sudo systemctl status playit \
+                --no-pager \
+                --full \
+                || true
+
+              echo ""
+              echo "🧹 Planned shutdown complete."
+              exit 0
+            fi
+
+            sleep "$CHECK_INTERVAL"
+          done
+
+
+      # ============================================================
+      # 12. FINAL DIAGNOSTICS
+      #
+      # Executed when a previous step fails.
+      # ============================================================
+
+      - name: "1️⃣2️⃣ 🧪 Final Diagnostics"
+        if: failure()
+        shell: bash
+        run: |
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║                  🧪 FINAL DIAGNOSTICS                      ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+
+          echo "⚠️ One or more previous steps failed."
+          echo ""
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🎮 PLAYIT VERSION"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
           playit version || true
 
           echo ""
-          echo "Playit installation completed."
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "⚙️ SYSTEMD STATUS"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-
-      # ============================================================
-      # 4. VERIFY PLAYIT
-      # ============================================================
-
-      - name: "4️⃣ 🔎 Verify Playit"
-        shell: bash
-        run: |
-          set -e
+          sudo systemctl status playit \
+            --no-pager \
+            --full \
+            2>&1 || true
 
           echo ""
-          echo "=================================================="
-          echo "PLAYIT VERIFICATION"
-          echo "=================================================="
-          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📜 PLAYIT JOURNAL"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-          command -v playit
-
-          echo ""
-          echo "Binary:"
-          readlink -f "$(command -v playit)" || true
-
-          echo ""
-          echo "Version:"
-          playit version
-
-
-      # ============================================================
-      # 5. GENERATE CLAIM CODE
-      #
-      # The code is intentionally NOT exchanged automatically.
-      # We will claim the agent manually through playit.gg.
-      # ============================================================
-
-      - name: "5️⃣ 🔐 Generate Claim Code"
-        shell: bash
-        run: |
-          set -e
+          sudo journalctl \
+            -u playit \
+            --no-pager \
+            -n 500 \
+            -o short-iso \
+            2>&1 || true
 
           echo ""
-          echo "=================================================="
-          echo "PLAYIT CLAIM"
-          echo "=================================================="
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📂 PLAYIT LOG FILES"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          sudo ls -lah \
+            /var/log/playit \
+            2>&1 || true
+
           echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📜 PLAYIT FILE LOG"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-          CLAIM_CODE="$(playit --stdout claim generate)"
-
-          if [ -z "$CLAIM_CODE" ]; then
-            echo "ERROR: Claim code was not generated."
-            exit 1
+          if [ -f /var/log/playit/playit.log ]; then
+            sudo tail -n 500 \
+              /var/log/playit/playit.log \
+              2>&1 || true
+          else
+            echo "⚠️ /var/log/playit/playit.log does not exist."
           fi
 
-          CLAIM_URL="https://playit.gg/claim/${CLAIM_CODE}"
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🧠 PROCESSES"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          ps aux | grep -i '[p]layit' || true
 
           echo ""
-          echo "╔══════════════════════════════════════════════════╗"
-          echo "║              PLAYIT CLAIM CODE                  ║"
-          echo "╚══════════════════════════════════════════════════╝"
-          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🌐 NETWORK"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-          echo "Claim Code:"
-          echo ""
-          echo "$CLAIM_CODE"
+          ip addr || true
 
           echo ""
-          echo "Claim URL:"
-          echo ""
-          echo "$CLAIM_URL"
+          ip route || true
 
           echo ""
-          echo "=================================================="
-          echo "ACTION REQUIRED"
-          echo "=================================================="
-          echo ""
-          echo "Open the Claim URL in your browser."
-          echo ""
-          echo "Or enter the Claim Code manually in:"
-          echo "https://playit.gg"
-          echo ""
-          echo "After claiming the agent, continue with the"
-          echo "Playit dashboard to create the game tunnel."
-          echo ""
+          sudo ss -lntup || true
 
-          {
-            echo "PLAYIT_CLAIM_CODE=$CLAIM_CODE"
-            echo "PLAYIT_CLAIM_URL=$CLAIM_URL"
-          } >> "$GITHUB_ENV"
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🔌 IPC SOCKETS"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          sudo ss -lxnp | grep -i playit || true
+
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📋 PLAYIT SERVICE FILE"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          sudo systemctl cat playit \
+            2>&1 || true
+
+          echo ""
+          echo "=============================================================="
+          echo "🛑 FINAL DIAGNOSTICS COMPLETE"
+          echo "=============================================================="
+          echo ""
 
 
       # ============================================================
-      # 6. START PLAYIT AGENT
-      #
-      # No secret is supplied here.
-      #
-      # The agent will remain in the claim/setup state until
-      # the account-side claim is completed.
+      # 13. FINAL SUCCESS SUMMARY
       # ============================================================
 
-      - name: "6️⃣ 🚀 Start Playit Agent"
-        shell: bash
-        run: |
-          set -e
-
-          echo ""
-          echo "=================================================="
-          echo "STARTING PLAYIT AGENT"
-          echo "=================================================="
-          echo ""
-
-          echo "Claim Code:"
-          echo "$PLAYIT_CLAIM_CODE"
-
-          echo ""
-          echo "Claim URL:"
-          echo "$PLAYIT_CLAIM_URL"
-
-          echo ""
-          echo "Starting Playit..."
-          echo ""
-
-          exec playit --stdout
-
-
-      # ============================================================
-      # 7. KEEP ALIVE
-      #
-      # This step is normally reached only if the agent process
-      # exits. It keeps the workflow alive for diagnostics.
-      # ============================================================
-
-      - name: "7️⃣ ⏱️ Keep Alive"
-        if: always()
+      - name: "1️⃣3️⃣ ✅ Final Summary"
+        if: success()
         shell: bash
         run: |
           echo ""
-          echo "=================================================="
-          echo "PLAYIT WORKFLOW"
-          echo "=================================================="
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║                    ✅ WORKFLOW COMPLETE                    ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
           echo ""
 
-          while true
-          do
-            echo "Heartbeat: $(date -u)"
+          echo "🎮 Playit Agent:"
+          echo "   ✅ Started"
+          echo "   ✅ Authenticated"
+          echo "   ✅ Monitored"
+          echo "   ✅ Gracefully stopped before GitHub timeout"
+          echo ""
 
-            if command -v playit >/dev/null 2>&1; then
-              echo "Playit binary: OK"
-            else
-              echo "Playit binary: MISSING"
-            fi
+          echo "⏱️ Safety:"
+          echo "   GitHub timeout : 360 minutes"
+          echo "   Playit stop    : 340 minutes"
+          echo "   Safety margin  : 20 minutes"
+          echo ""
 
-            sleep 600
-          done
+          echo "🔐 Secret:"
+          echo "   GitHub Secret : PLAYIT_SECRET_KEY"
+          echo "   Status        : [REDACTED / CONFIGURED]"
+          echo ""
+
+          echo "📜 Logs:"
+          echo "   systemd journal : available in previous workflow logs"
+          echo "   Playit logfile  : /var/log/playit/playit.log"
+          echo ""
+
+          echo "=============================================================="
+          echo "🎮 PLAYIT AGENT SESSION FINISHED CLEANLY"
+          echo "=============================================================="
+          echo ""
 ```
