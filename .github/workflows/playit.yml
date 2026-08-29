@@ -5,72 +5,72 @@ on:
     inputs:
 
       # ============================================================
-      # 🎮 SERVER IDENTITY
+      # 🎮 SERVER
       # ============================================================
 
       hostname:
         name: "🏷️ Server Hostname"
-        description: "نامی که بازیکنان در Server Browser می‌بینند."
+        description: "نام سرور در Server Browser."
         required: true
         default: "🎮 CS 1.6 Vanilla | Playit"
         type: string
 
       start_map:
         name: "🗺️ Start Map"
-        description: "نام map اولیه. مثال: de_dust2"
+        description: "Map اولیه، مثل de_dust2."
         required: true
         default: "de_dust2"
         type: string
 
       maxplayers:
         name: "👥 Max Players"
-        description: "حداکثر تعداد بازیکنان."
+        description: "حداکثر بازیکنان. محدوده 1 تا 32."
         required: true
-        default: "16"
+        default: 16
         type: number
 
       # ============================================================
-      # ⚙️ ROUND / GAMEPLAY
+      # ⚙️ GAMEPLAY
       # ============================================================
 
       roundtime:
         name: "⏱️ Round Time"
-        description: "زمان هر Round بر حسب دقیقه."
+        description: "مدت Round بر حسب دقیقه."
         required: true
-        default: "5"
+        default: 5
         type: number
 
       freezetime:
         name: "❄️ Freeze Time"
         description: "زمان Freeze ابتدای Round بر حسب ثانیه."
         required: true
-        default: "3"
+        default: 3
         type: number
 
       buytime:
         name: "💰 Buy Time"
         description: "زمان خرید بر حسب دقیقه."
         required: true
-        default: "0.25"
+        default: 0.25
         type: number
 
       startmoney:
         name: "💵 Start Money"
         description: "پول اولیه بازیکنان."
         required: true
-        default: "800"
+        default: 800
         type: number
 
       friendlyfire:
         name: "🔫 Friendly Fire"
-        description: "آیا آسیب به هم‌تیمی‌ها فعال باشد؟"
+        description: "آسیب به هم‌تیمی‌ها."
         required: true
         default: false
         type: boolean
 
       footsteps:
         name: "👣 Footsteps"
-        description: "فعال بودن صدای قدم‌ها."
+        description: "صدای قدم‌ها."
         required: true
         default: true
         type: boolean
@@ -79,7 +79,7 @@ on:
         name: "⚖️ Team Limit"
         description: "حداکثر اختلاف تعداد بازیکنان دو تیم."
         required: true
-        default: "2"
+        default: 2
         type: number
 
       autoteambalance:
@@ -100,12 +100,12 @@ on:
         name: "💣 C4 Timer"
         description: "زمان انفجار C4 بر حسب ثانیه."
         required: true
-        default: "35"
+        default: 35
         type: number
 
       forcechasecam:
         name: "👁️ Force Chase Camera"
-        description: "محدودیت Spectator Camera."
+        description: "حالت محدودیت دوربین Spectator."
         required: true
         default: "0"
         type: choice
@@ -127,7 +127,7 @@ on:
 
       alltalk:
         name: "📢 All Talk"
-        description: "آیا بازیکنان زنده و مرده بتوانند با همه صحبت کنند؟"
+        description: "ارتباط صوتی بین بازیکنان تیم‌ها و Spectator."
         required: true
         default: false
         type: boolean
@@ -140,49 +140,49 @@ on:
         name: "📡 sv_maxrate"
         description: "حداکثر network rate."
         required: true
-        default: "25000"
+        default: 25000
         type: number
 
       minrate:
         name: "📡 sv_minrate"
         description: "حداقل network rate."
         required: true
-        default: "2500"
+        default: 2500
         type: number
 
       maxupdaterate:
         name: "📡 sv_maxupdaterate"
         description: "حداکثر update rate."
         required: true
-        default: "101"
+        default: 101
         type: number
 
       minupdaterate:
         name: "📡 sv_minupdaterate"
         description: "حداقل update rate."
         required: true
-        default: "20"
+        default: 20
         type: number
 
       unlag:
         name: "🛰️ sv_unlag"
-        description: "فعال بودن lag compensation."
+        description: "فعال بودن Lag Compensation."
         required: true
         default: true
         type: boolean
 
       maxunlag:
         name: "🛰️ sv_maxunlag"
-        description: "حداکثر زمان lag compensation."
+        description: "حداکثر زمان Lag Compensation."
         required: true
-        default: "0.5"
+        default: 0.5
         type: number
 
-      systicrate:
+      sys_ticrate:
         name: "⚙️ sys_ticrate"
-        description: "Tick rate سرور HLDS."
+        description: "نرخ پردازش HLDS. محدوده 10 تا 1000."
         required: true
-        default: "1000"
+        default: 1000
         type: number
 
       # ============================================================
@@ -191,7 +191,7 @@ on:
 
       logdetail:
         name: "📜 mp_logdetail"
-        description: "سطح جزئیات log مربوط به بازیکنان."
+        description: "سطح جزئیات Player Logging."
         required: true
         default: "3"
         type: choice
@@ -202,15 +202,26 @@ on:
           - "3"
 
       # ============================================================
-      # 🧩 ADVANCED
+      # 🧩 ADVANCED VANILLA CVARS
       # ============================================================
 
       extra_cvars:
-        name: "🧩 Extra Vanilla HLDS CVars"
-        description: "هر CVar اضافی را یک خط وارد کنید. مثال: mp_timelimit 30"
+        name: "🧩 Advanced Vanilla CVars"
+        description: "CVarهای اضافی را با ; جدا کنید. مثال: mp_timelimit 30;mp_flashlight 1"
         required: false
         default: ""
         type: string
+
+
+# ================================================================
+# 🔒 CONCURRENCY
+# ================================================================
+# جلوگیری از اجرای هم‌زمان دو Agent با یک Playit Secret.
+# ================================================================
+
+concurrency:
+  group: "cs16-playit-server"
+  cancel-in-progress: false
 
 
 jobs:
@@ -219,7 +230,7 @@ jobs:
 
     name: "🎮 Playit + CS 1.6 Vanilla"
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     # GitHub-hosted runner hard limit.
     timeout-minutes: 360
@@ -230,36 +241,34 @@ jobs:
     env:
 
       # ============================================================
-      # 🔒 FIXED NETWORK CONFIGURATION
+      # 🔒 FIXED LOCAL ORIGIN
       # ============================================================
-
-      # Playit Tunnel:
-      # UDP
-      # Origin: 127.0.0.1:27015
 
       CS_IP: "127.0.0.1"
       CS_PORT: "27015"
-
-      # Playit tunnel is expected to point to:
-      # UDP 127.0.0.1:27015
 
       # ============================================================
       # 📂 PATHS
       # ============================================================
 
       CS_INSTALL_DIR: "/opt/cs16"
+      PLAYIT_CONFIG_DIR: "/etc/playit"
+      PLAYIT_CONFIG_FILE: "/etc/playit/playit.toml"
 
       # ============================================================
       # ⏱️ RUNTIME
       # ============================================================
+      # 330 minutes runtime + ~30 minutes safety margin
+      # inside the 360-minute GitHub-hosted runner limit.
+      # ============================================================
 
-      MAX_RUNTIME_MINUTES: "340"
-      MONITOR_INTERVAL_SECONDS: "30"
+      MAX_RUNTIME_MINUTES: "330"
+
 
     steps:
 
       # ============================================================
-      # 1. SYSTEM INFORMATION
+      # 1️⃣ SYSTEM INFORMATION
       # ============================================================
 
       - name: "1️⃣ 🖥️ System Information"
@@ -267,181 +276,321 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          echo
           echo "=============================================================="
           echo "🖥️ SYSTEM INFORMATION"
           echo "=============================================================="
-          echo
 
-          echo "📅 UTC:"
-          date -u
-
-          echo
-          echo "🐧 OS:"
+          echo "OS:"
           cat /etc/os-release
 
           echo
-          echo "🧠 Kernel:"
+          echo "Kernel:"
           uname -a
 
           echo
-          echo "🏗️ Architecture:"
-          uname -m
+          echo "CPU:"
+          lscpu | sed -n '1,25p'
 
           echo
-          echo "⚙️ CPU:"
-          lscpu | sed -n '1,35p' || true
-
-          echo
-          echo "🧠 MEMORY:"
+          echo "Memory:"
           free -h
 
           echo
-          echo "💾 FILESYSTEM:"
+          echo "Disk:"
           df -h
 
           echo
-          echo "🌐 NETWORK:"
-          ip -br addr || true
-
-          echo
-          echo "🛣️ ROUTING:"
-          ip route || true
-
-          echo
-          echo "🔌 DNS:"
-          cat /etc/resolv.conf || true
+          echo "Network:"
+          ip -br addr
 
           echo
           echo "=============================================================="
-          echo "✅ SYSTEM INFORMATION COMPLETE"
-          echo "=============================================================="
+
 
       # ============================================================
-      # 2. VALIDATE USER INPUTS
+      # 2️⃣ VALIDATE INPUTS
       # ============================================================
 
       - name: "2️⃣ 🔎 Validate Server Configuration"
         shell: bash
         env:
-          INPUT_HOSTNAME: ${{ inputs.hostname }}
-          INPUT_MAP: ${{ inputs.start_map }}
-          INPUT_MAXPLAYERS: ${{ inputs.maxplayers }}
-          INPUT_ROUNDTIME: ${{ inputs.roundtime }}
-          INPUT_FREEZETIME: ${{ inputs.freezetime }}
-          INPUT_BUYTIME: ${{ inputs.buytime }}
-          INPUT_STARTMONEY: ${{ inputs.startmoney }}
-          INPUT_LIMITTEAMS: ${{ inputs.limitteams }}
-          INPUT_C4TIMER: ${{ inputs.c4timer }}
-          INPUT_MAXRATE: ${{ inputs.maxrate }}
-          INPUT_MINRATE: ${{ inputs.minrate }}
-          INPUT_MAXUPDATERATE: ${{ inputs.maxupdaterate }}
-          INPUT_MINUPDATERATE: ${{ inputs.minupdaterate }}
-          INPUT_MAXUNLAG: ${{ inputs.maxunlag }}
-          INPUT_SYSTICRATE: ${{ inputs.systicrate }}
+          HOSTNAME_INPUT: ${{ inputs.hostname }}
+          MAP_INPUT: ${{ inputs.start_map }}
+          MAXPLAYERS_INPUT: ${{ inputs.maxplayers }}
+          ROUNDTIME_INPUT: ${{ inputs.roundtime }}
+          FREEZETIME_INPUT: ${{ inputs.freezetime }}
+          BUYTIME_INPUT: ${{ inputs.buytime }}
+          STARTMONEY_INPUT: ${{ inputs.startmoney }}
+          LIMITTEAMS_INPUT: ${{ inputs.limitteams }}
+          C4TIMER_INPUT: ${{ inputs.c4timer }}
+          MAXRATE_INPUT: ${{ inputs.maxrate }}
+          MINRATE_INPUT: ${{ inputs.minrate }}
+          MAXUPDATERATE_INPUT: ${{ inputs.maxupdaterate }}
+          MINUPDATERATE_INPUT: ${{ inputs.minupdaterate }}
+          MAXUNLAG_INPUT: ${{ inputs.maxunlag }}
+          SYSTICRATE_INPUT: ${{ inputs.sys_ticrate }}
+          FORCECHASECAM_INPUT: ${{ inputs.forcechasecam }}
+          LOGDETAIL_INPUT: ${{ inputs.logdetail }}
+          EXTRA_CVARS_INPUT: ${{ inputs.extra_cvars }}
+
         run: |
           set -Eeuo pipefail
 
-          echo
           echo "=============================================================="
-          echo "🔎 VALIDATING USER CONFIGURATION"
+          echo "🔎 VALIDATING CONFIGURATION"
           echo "=============================================================="
-          echo
 
-          if [ -z "$INPUT_HOSTNAME" ]; then
-            echo "❌ Hostname is empty."
+          # ----------------------------------------------------------
+          # Hostname
+          # ----------------------------------------------------------
+
+          if [[ -z "$HOSTNAME_INPUT" ]]; then
+            echo "❌ Hostname cannot be empty."
             exit 1
           fi
 
-          if [ -z "$INPUT_MAP" ]; then
-            echo "❌ Start map is empty."
+          if (( ${#HOSTNAME_INPUT} > 100 )); then
+            echo "❌ Hostname is too long."
+            echo "   Maximum: 100 characters."
             exit 1
           fi
 
-          if ! [[ "$INPUT_MAXPLAYERS" =~ ^[0-9]+$ ]]; then
-            echo "❌ Max players must be an integer."
+          if [[ "$HOSTNAME_INPUT" =~ [[:cntrl:]] ||
+                "$HOSTNAME_INPUT" == *'"'* ||
+                "$HOSTNAME_INPUT" == *'\'* ||
+                "$HOSTNAME_INPUT" == *';'* ]]; then
+            echo "❌ Hostname contains unsupported characters."
             exit 1
           fi
 
-          if [ "$INPUT_MAXPLAYERS" -lt 1 ] || [ "$INPUT_MAXPLAYERS" -gt 32 ]; then
-            echo "❌ Max players must be between 1 and 32."
+          # ----------------------------------------------------------
+          # Map
+          # ----------------------------------------------------------
+
+          if [[ -z "$MAP_INPUT" ||
+                ! "$MAP_INPUT" =~ ^[A-Za-z0-9_]+$ ]]; then
+            echo "❌ Invalid map name."
+            echo "   Allowed: A-Z, a-z, 0-9 and _"
             exit 1
           fi
 
-          if ! [[ "$INPUT_ROUNDTIME" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
-            echo "❌ Round time is invalid."
+          if (( ${#MAP_INPUT} > 64 )); then
+            echo "❌ Map name is too long."
             exit 1
           fi
 
-          if ! [[ "$INPUT_FREEZETIME" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
-            echo "❌ Freeze time is invalid."
+          # ----------------------------------------------------------
+          # Max Players
+          # ----------------------------------------------------------
+
+          if ! [[ "$MAXPLAYERS_INPUT" =~ ^[0-9]+$ ]]; then
+            echo "❌ Max Players must be an integer."
             exit 1
           fi
 
-          if ! [[ "$INPUT_BUYTIME" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
-            echo "❌ Buy time is invalid."
+          if (( MAXPLAYERS_INPUT < 1 || MAXPLAYERS_INPUT > 32 )); then
+            echo "❌ Max Players must be between 1 and 32."
             exit 1
           fi
 
-          if ! [[ "$INPUT_STARTMONEY" =~ ^[0-9]+$ ]]; then
-            echo "❌ Start money is invalid."
+          # ----------------------------------------------------------
+          # Numeric syntax
+          # ----------------------------------------------------------
+
+          if ! [[ "$ROUNDTIME_INPUT" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+            echo "❌ Invalid Round Time."
             exit 1
           fi
 
-          if ! [[ "$INPUT_LIMITTEAMS" =~ ^[0-9]+$ ]]; then
-            echo "❌ Team limit is invalid."
+          if ! [[ "$FREEZETIME_INPUT" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+            echo "❌ Invalid Freeze Time."
             exit 1
           fi
 
-          if ! [[ "$INPUT_C4TIMER" =~ ^[0-9]+$ ]]; then
-            echo "❌ C4 timer is invalid."
+          if ! [[ "$BUYTIME_INPUT" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+            echo "❌ Invalid Buy Time."
             exit 1
           fi
 
-          if ! [[ "$INPUT_MAXRATE" =~ ^[0-9]+$ ]]; then
-            echo "❌ sv_maxrate is invalid."
+          if ! [[ "$STARTMONEY_INPUT" =~ ^[0-9]+$ ]]; then
+            echo "❌ Invalid Start Money."
             exit 1
           fi
 
-          if ! [[ "$INPUT_MINRATE" =~ ^[0-9]+$ ]]; then
-            echo "❌ sv_minrate is invalid."
+          if ! [[ "$LIMITTEAMS_INPUT" =~ ^[0-9]+$ ]]; then
+            echo "❌ Invalid Team Limit."
             exit 1
           fi
 
-          if ! [[ "$INPUT_MAXUPDATERATE" =~ ^[0-9]+$ ]]; then
-            echo "❌ sv_maxupdaterate is invalid."
+          if ! [[ "$C4TIMER_INPUT" =~ ^[0-9]+$ ]]; then
+            echo "❌ Invalid C4 Timer."
             exit 1
           fi
 
-          if ! [[ "$INPUT_MINUPDATERATE" =~ ^[0-9]+$ ]]; then
-            echo "❌ sv_minupdaterate is invalid."
+          if ! [[ "$MAXRATE_INPUT" =~ ^[0-9]+$ &&
+                  "$MINRATE_INPUT" =~ ^[0-9]+$ &&
+                  "$MAXUPDATERATE_INPUT" =~ ^[0-9]+$ &&
+                  "$MINUPDATERATE_INPUT" =~ ^[0-9]+$ ]]; then
+            echo "❌ Invalid network rate."
             exit 1
           fi
 
-          if ! [[ "$INPUT_MAXUNLAG" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
-            echo "❌ sv_maxunlag is invalid."
+          if ! [[ "$MAXUNLAG_INPUT" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+            echo "❌ Invalid sv_maxunlag."
             exit 1
           fi
 
-          if ! [[ "$INPUT_SYSTICRATE" =~ ^[0-9]+$ ]]; then
-            echo "❌ sys_ticrate is invalid."
+          if ! [[ "$SYSTICRATE_INPUT" =~ ^[0-9]+$ ]]; then
+            echo "❌ Invalid sys_ticrate."
             exit 1
           fi
 
-          if [ "$INPUT_MAXRATE" -lt "$INPUT_MINRATE" ]; then
+          if ! [[ "$FORCECHASECAM_INPUT" =~ ^[012]$ ]]; then
+            echo "❌ Invalid mp_forcechasecam."
+            exit 1
+          fi
+
+          if ! [[ "$LOGDETAIL_INPUT" =~ ^[0123]$ ]]; then
+            echo "❌ Invalid mp_logdetail."
+            exit 1
+          fi
+
+          # ----------------------------------------------------------
+          # Semantic ranges
+          # ----------------------------------------------------------
+
+          if (( $(awk -v v="$ROUNDTIME_INPUT" 'BEGIN {print (v < 1 || v > 9)}') )); then
+            echo "❌ Round Time must be between 1 and 9 minutes."
+            exit 1
+          fi
+
+          if (( $(awk -v v="$FREEZETIME_INPUT" 'BEGIN {print (v < 0 || v > 60)}') )); then
+            echo "❌ Freeze Time must be between 0 and 60 seconds."
+            exit 1
+          fi
+
+          if (( $(awk -v v="$BUYTIME_INPUT" 'BEGIN {print (v < 0 || v > 9)}') )); then
+            echo "❌ Buy Time must be between 0 and 9 minutes."
+            exit 1
+          fi
+
+          if (( STARTMONEY_INPUT < 800 || STARTMONEY_INPUT > 16000 )); then
+            echo "❌ Start Money must be between 800 and 16000."
+            exit 1
+          fi
+
+          if (( LIMITTEAMS_INPUT < 0 || LIMITTEAMS_INPUT > 32 )); then
+            echo "❌ Team Limit must be between 0 and 32."
+            exit 1
+          fi
+
+          if (( C4TIMER_INPUT < 15 || C4TIMER_INPUT > 90 )); then
+            echo "❌ C4 Timer must be between 15 and 90 seconds."
+            exit 1
+          fi
+
+          if (( MAXRATE_INPUT < MINRATE_INPUT )); then
             echo "❌ sv_maxrate cannot be lower than sv_minrate."
             exit 1
           fi
 
-          if [ "$INPUT_MAXUPDATERATE" -lt "$INPUT_MINUPDATERATE" ]; then
-            echo "❌ sv_maxupdaterate cannot be lower than sv_minupdaterate."
+          if (( MINRATE_INPUT < 0 || MAXRATE_INPUT > 100000 )); then
+            echo "❌ Network rate must be between 0 and 100000."
             exit 1
           fi
 
-          echo "✅ Configuration validation passed."
+          if (( MINUPDATERATE_INPUT < 1 ||
+                MAXUPDATERATE_INPUT < MINUPDATERATE_INPUT ||
+                MAXUPDATERATE_INPUT > 102 )); then
+            echo "❌ Update rate must be between 1 and 102."
+            exit 1
+          fi
+
+          if (( $(awk -v v="$MAXUNLAG_INPUT" 'BEGIN {print (v < 0 || v > 1)}') )); then
+            echo "❌ sv_maxunlag must be between 0 and 1 second."
+            exit 1
+          fi
+
+          if (( SYSTICRATE_INPUT < 10 || SYSTICRATE_INPUT > 1000 )); then
+            echo "❌ sys_ticrate must be between 10 and 1000."
+            exit 1
+          fi
+
+          # ----------------------------------------------------------
+          # Advanced CVars
+          # ----------------------------------------------------------
+
+          if [[ -n "$EXTRA_CVARS_INPUT" ]]; then
+
+            IFS=';' read -ra CVARS <<< "$EXTRA_CVARS_INPUT"
+
+            for ENTRY in "${CVARS[@]}"; do
+
+              ENTRY="$(printf '%s' "$ENTRY" |
+                sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+              [[ -z "$ENTRY" ]] && continue
+
+              if [[ "$ENTRY" =~ [[:cntrl:]] ]]; then
+                echo "❌ Advanced CVar contains control characters."
+                exit 1
+              fi
+
+              if (( ${#ENTRY} > 200 )); then
+                echo "❌ Advanced CVar entry is too long."
+                exit 1
+              fi
+
+              if [[ "$ENTRY" == *'"'* ||
+                    "$ENTRY" == *"'"* ||
+                    "$ENTRY" == *'\'* ]]; then
+                echo "❌ Advanced CVar contains unsupported quote characters."
+                exit 1
+              fi
+
+              if [[ ! "$ENTRY" =~ ^(mp_[A-Za-z0-9_]+|sv_[A-Za-z0-9_]+|allow_spectators|decalfrequency|edgefriction|host_framerate|pausable|log)[[:space:]]+[^[:cntrl:];[:space:]]+$ ]]; then
+                echo "❌ Invalid Advanced CVar:"
+                echo "   $ENTRY"
+                exit 1
+              fi
+
+              if [[ "$ENTRY" =~ (^|[[:space:]])(exec|quit|exit|alias|bind|unbind|rcon|changelevel|map|restart|shutdown|writeid|writeip|_restart)([[:space:]]|$) ]]; then
+                echo "❌ Server command is not allowed:"
+                echo "   $ENTRY"
+                exit 1
+              fi
+
+              if [[ "$ENTRY" == *'&&'* ||
+                    "$ENTRY" == *'||'* ||
+                    "$ENTRY" == *'>>'* ||
+                    "$ENTRY" == *'>'* ||
+                    "$ENTRY" == *'<'* ||
+                    "$ENTRY" == *'$('* ||
+                    "$ENTRY" == *'`'* ]]; then
+                echo "❌ Unsupported command syntax in Advanced CVar:"
+                echo "   $ENTRY"
+                exit 1
+              fi
+
+              CVAR_NAME="${ENTRY%%[[:space:]]*}"
+
+              case "$CVAR_NAME" in
+                *password*|*passwd*|*rcon*|*auth*|*token*|*secret*)
+                  echo "❌ Secret/authentication-related CVars are not allowed:"
+                  echo "   $CVAR_NAME"
+                  exit 1
+                  ;;
+              esac
+
+            done
+          fi
+
+          echo
+          echo "✅ Configuration is valid."
+
 
       # ============================================================
-      # 3. INSTALL DEPENDENCIES
+      # 3️⃣ INSTALL DEPENDENCIES
       # ============================================================
 
       - name: "3️⃣ 📦 Install Dependencies"
@@ -449,62 +598,42 @@ jobs:
         run: |
           set -Eeuo pipefail
 
-          echo
-          echo "=============================================================="
-          echo "📦 INSTALLING DEPENDENCIES"
-          echo "=============================================================="
-          echo
+          export DEBIAN_FRONTEND=noninteractive
+
+          sudo dpkg --add-architecture i386
 
           sudo apt-get update
 
           sudo apt-get install -y \
-            curl \
             ca-certificates \
-            gnupg \
-            jq \
-            iproute2 \
-            net-tools \
-            dnsutils \
-            procps \
-            lsof \
-            unzip \
-            tar \
-            wget \
-            lib32gcc-s1 \
-            lib32stdc++6 \
-            libc6-i386 \
-            tmux \
-            steamcmd
-
-          echo
-          echo "🔎 Verifying tools..."
-
-          for command in \
             curl \
-            wget \
-            gpg \
-            jq \
-            ip \
-            ss \
-            dig \
-            free \
-            lsof \
-            tmux \
-            steamcmd
-          do
-            if command -v "$command" >/dev/null 2>&1; then
-              echo "   ✅ $command -> $(command -v "$command")"
-            else
-              echo "   ❌ Missing: $command"
-              exit 1
-            fi
-          done
+            gnupg \
+            iproute2 \
+            procps \
+            steamcmd \
+            util-linux
+
+          command -v curl
+          command -v gpg
+          command -v ss
+          command -v steamcmd
+          command -v timeout
 
           echo
-          echo "✅ Dependencies ready."
+          echo "Architecture:"
+          dpkg --print-architecture
+          dpkg --print-foreign-architectures
+
+          echo
+          echo "SteamCMD:"
+          steamcmd +quit
+
+          echo
+          echo "✅ Dependencies installed."
+
 
       # ============================================================
-      # 4. CONFIGURE OFFICIAL PLAYIT REPOSITORY
+      # 4️⃣ CONFIGURE PLAYIT REPOSITORY
       # ============================================================
 
       - name: "4️⃣ 🎮 Configure Playit Repository"
@@ -515,16 +644,12 @@ jobs:
           PLAYIT_KEYRING="/etc/apt/trusted.gpg.d/playit.gpg"
           PLAYIT_SOURCE="/etc/apt/sources.list.d/playit-cloud.list"
 
-          echo
-          echo "=============================================================="
-          echo "🎮 PLAYIT REPOSITORY"
-          echo "=============================================================="
-          echo
-
-          curl -SsL \
+          curl -fsSL \
             https://playit-cloud.github.io/ppa/key.gpg |
             gpg --dearmor |
             sudo tee "$PLAYIT_KEYRING" >/dev/null
+
+          sudo chmod 0644 "$PLAYIT_KEYRING"
 
           echo \
             "deb [signed-by=$PLAYIT_KEYRING] https://playit-cloud.github.io/ppa/data ./" |
@@ -532,334 +657,197 @@ jobs:
 
           sudo apt-get update
 
-          echo
-          echo "🔎 Playit package:"
-          apt-cache policy playit || true
-
-          echo
           echo "✅ Playit repository configured."
 
+
       # ============================================================
-      # 5. INSTALL PLAYIT
+      # 5️⃣ INSTALL PLAYIT
       # ============================================================
 
-      - name: "5️⃣ 📥 Install Playit Agent"
+      - name: "5️⃣ 📥 Install Playit"
         shell: bash
         run: |
           set -Eeuo pipefail
-
-          echo
-          echo "=============================================================="
-          echo "📥 INSTALLING PLAYIT"
-          echo "=============================================================="
-          echo
 
           sudo apt-get install -y playit
 
-          echo
-          echo "🎮 Playit executable:"
-          command -v playit || true
-
-          echo
-          echo "🎮 Playit version:"
-          playit version || true
-
-          echo
-          echo "📦 Package:"
-          dpkg -s playit |
-            sed \
-              -n \
-              -e '/^Package:/p' \
-              -e '/^Version:/p' \
-              -e '/^Architecture:/p' \
-              -e '/^Status:/p'
-
-          echo
-          echo "=============================================================="
-          echo "✅ PLAYIT INSTALLED"
-          echo "=============================================================="
-
-      # ============================================================
-      # 6. VALIDATE PLAYIT SECRET
-      # ============================================================
-
-      - name: "6️⃣ 🔐 Validate Playit Secret"
-        shell: bash
-        env:
-          PLAYIT_SECRET_KEY: ${{ secrets.PLAYIT_SECRET_KEY }}
-        run: |
-          set -Eeuo pipefail
-
-          echo
-          echo "=============================================================="
-          echo "🔐 PLAYIT SECRET VALIDATION"
-          echo "=============================================================="
-          echo
-
-          if [ -z "${PLAYIT_SECRET_KEY:-}" ]; then
-            echo "❌ PLAYIT_SECRET_KEY is missing."
-            echo
-            echo "Create this repository secret before running the workflow."
+          if ! command -v playit >/dev/null 2>&1; then
+            echo "❌ Playit executable was not installed."
             exit 1
           fi
 
-          echo "🔐 Secret detected."
-          echo "   Value: [REDACTED]"
+          echo "Playit version:"
+          playit version
 
           echo
-          echo "✅ Secret validation passed."
+          echo "Playit service:"
+          sudo systemctl cat playit --no-pager
+
+          echo
+          echo "✅ Playit installed."
+
 
       # ============================================================
-      # 7. CONFIGURE PLAYIT SECRET
+      # 6️⃣ CONFIGURE PLAYIT SECRET
       # ============================================================
 
-      - name: "7️⃣ 🔐 Configure Playit Agent"
+      - name: "6️⃣ 🔐 Configure Playit Secret"
         shell: bash
         env:
           PLAYIT_SECRET_KEY: ${{ secrets.PLAYIT_SECRET_KEY }}
+
         run: |
           set -Eeuo pipefail
-          umask 077
 
-          PLAYIT_CONFIG_DIR="/etc/playit"
-          PLAYIT_SECRET_FILE="/etc/playit/playit.toml"
+          if [[ -z "${PLAYIT_SECRET_KEY:-}" ]]; then
+            echo "❌ GitHub Secret PLAYIT_SECRET_KEY is missing."
+            exit 1
+          fi
 
-          echo
-          echo "=============================================================="
-          echo "🔐 PLAYIT AUTHENTICATION"
-          echo "=============================================================="
-          echo
+          if [[ "$PLAYIT_SECRET_KEY" =~ [[:cntrl:]] ]]; then
+            echo "❌ PLAYIT_SECRET_KEY contains unsupported control characters."
+            exit 1
+          fi
+
+          if [[ ! "$PLAYIT_SECRET_KEY" =~ ^[A-Za-z0-9_-]{32,256}$ ]]; then
+            echo "❌ PLAYIT_SECRET_KEY has an invalid format."
+            exit 1
+          fi
 
           sudo install \
             -d \
+            -o playit \
+            -g playit \
             -m 0750 \
             "$PLAYIT_CONFIG_DIR"
 
-          TMP_SECRET="$(mktemp)"
+          TMP_FILE="$(mktemp)"
 
-          trap 'rm -f "$TMP_SECRET"' EXIT
+          cleanup_tmp() {
+            rm -f "$TMP_FILE"
+          }
+
+          trap cleanup_tmp EXIT
+
+          ESCAPED_SECRET="${PLAYIT_SECRET_KEY//\\/\\\\}"
+          ESCAPED_SECRET="${ESCAPED_SECRET//\"/\\\"}"
 
           printf 'secret_key = "%s"\n' \
-            "$PLAYIT_SECRET_KEY" \
-            > "$TMP_SECRET"
-
-          chmod 600 "$TMP_SECRET"
+            "$ESCAPED_SECRET" > "$TMP_FILE"
 
           sudo install \
             -o playit \
             -g playit \
             -m 0600 \
-            "$TMP_SECRET" \
-            "$PLAYIT_SECRET_FILE"
+            "$TMP_FILE" \
+            "$PLAYIT_CONFIG_FILE"
 
-          rm -f "$TMP_SECRET"
+          unset PLAYIT_SECRET_KEY
+          unset ESCAPED_SECRET
 
-          echo "🔎 Secret file:"
+          echo "✅ Playit secret configured."
+
           sudo stat \
-            -c '   Path        : %n
-             Owner       : %U:%G
-             Permissions : %a
-             Size        : %s bytes' \
-            "$PLAYIT_SECRET_FILE"
+            -c 'Path=%n Owner=%U:%G Mode=%a Size=%s' \
+            "$PLAYIT_CONFIG_FILE"
 
-          echo
-          echo "🔎 Syntax:"
-          sudo grep -Eq '^secret_key = ".+"' \
-            "$PLAYIT_SECRET_FILE"
-
-          echo "   ✅ secret_key entry detected."
-          echo "   🔐 Value: [REDACTED]"
 
       # ============================================================
-      # 8. PLAYIT SERVICE PREFLIGHT
+      # 7️⃣ START + VERIFY PLAYIT
       # ============================================================
 
-      - name: "8️⃣ ⚙️ Verify Playit Service"
+      - name: "7️⃣ 🚇 Start and Verify Playit Tunnel"
         shell: bash
         run: |
           set -Eeuo pipefail
 
-          echo
           echo "=============================================================="
-          echo "⚙️ PLAYIT SYSTEMD SERVICE"
+          echo "🚇 STARTING PLAYIT"
           echo "=============================================================="
-          echo
 
           sudo systemctl daemon-reload
-
-          echo "📄 Service:"
-          sudo systemctl cat playit || true
-
-          echo
-          echo "📁 Secret:"
-          sudo ls -la /etc/playit/
-
-          echo
-          echo "✅ Playit service configuration inspected."
-
-      # ============================================================
-      # 9. NETWORK PREFLIGHT
-      # ============================================================
-
-      - name: "9️⃣ 🌐 Network Pre-Flight"
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-
-          echo
-          echo "=============================================================="
-          echo "🌐 NETWORK PRE-FLIGHT"
-          echo "=============================================================="
-          echo
-
-          echo "🌍 Public IPv4:"
-          curl \
-            -4 \
-            --fail \
-            --silent \
-            --show-error \
-            --max-time 15 \
-            https://api.ipify.org \
-            || true
-
-          echo
-          echo
-
-          echo "🔐 Playit API:"
-          curl \
-            -I \
-            --fail \
-            --silent \
-            --show-error \
-            --max-time 15 \
-            https://api.playit.gg \
-            || true
-
-          echo
-          echo
-
-          echo "🧭 DNS:"
-          getent hosts api.playit.gg || true
-
-          echo
-          echo "=============================================================="
-          echo "✅ NETWORK PREFLIGHT COMPLETE"
-          echo "=============================================================="
-
-      # ============================================================
-      # 10. START PLAYIT
-      # ============================================================
-
-      - name: "🔟 🚀 Start Playit Agent"
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-
-          echo
-          echo "=============================================================="
-          echo "🚀 STARTING PLAYIT"
-          echo "=============================================================="
-          echo
-
           sudo systemctl enable playit
           sudo systemctl restart playit
 
-          sleep 5
+          PLAYIT_READY=0
 
-          echo
-          echo "📊 Service status:"
-          sudo systemctl status playit \
-            --no-pager \
-            --full \
-            || true
+          for attempt in {1..45}; do
 
-          echo
-          echo "📜 Recent journal:"
-          sudo journalctl \
-            -u playit \
-            --no-pager \
-            -n 100 \
-            -o short-iso \
-            || true
+            if ! sudo systemctl is-active --quiet playit; then
+              echo "⏳ Playit service is not active ($attempt/45)..."
+              sleep 2
+              continue
+            fi
 
-      # ============================================================
-      # 11. VERIFY PLAYIT
-      # ============================================================
+            if ! sudo test -s "$PLAYIT_CONFIG_FILE"; then
+              echo "❌ Playit secret file disappeared."
+              exit 1
+            fi
 
-      - name: "1️⃣1️⃣ 🔎 Verify Playit"
-        shell: bash
-        run: |
-          set -Eeuo pipefail
+            if sudo journalctl \
+              -u playit \
+              --no-pager \
+              -n 100 2>/dev/null |
+              grep -Eq 'playit connected; tunnels loaded|playit tunnel state updated'; then
 
-          echo
-          echo "=============================================================="
-          echo "🔎 VERIFYING PLAYIT"
-          echo "=============================================================="
-          echo
+              PLAYIT_READY=1
+              echo "✅ Playit agent connected to the control plane."
+              break
+            fi
 
-          if sudo systemctl is-active --quiet playit; then
-            echo "🟢 Playit service is ACTIVE."
-          else
-            echo "🔴 Playit service is NOT ACTIVE."
+            echo "⏳ Waiting for Playit agent/tunnel state ($attempt/45)..."
+            sleep 2
 
+          done
+
+          if (( PLAYIT_READY == 0 )); then
+
+            echo "❌ Playit did not report a connected tunnel state."
+
+            echo
+            echo "Service status:"
+            sudo systemctl status playit \
+              --no-pager \
+              --full || true
+
+            echo
+            echo "Playit journal:"
             sudo journalctl \
               -u playit \
               --no-pager \
-              -n 200 \
-              -o short-iso \
-              || true
+              -n 200 || true
 
             exit 1
           fi
 
           echo
-          echo "🧩 Playit process:"
-          ps aux | grep -Ei '[p]layit|[p]layitd' || true
-
-          echo
-          echo "🔌 Network sockets:"
-          sudo ss -lntup || true
-
-          echo
-          echo "📜 Playit log:"
+          echo "Recent Playit journal:"
           sudo journalctl \
             -u playit \
             --no-pager \
-            -n 100 \
-            -o short-iso \
-            || true
+            -n 80 || true
 
           echo
-          echo "✅ Playit agent is active."
+          echo "=============================================================="
+          echo "✅ PLAYIT AGENT READY"
+          echo "=============================================================="
+
 
       # ============================================================
-      # 12. INSTALL HLDS / CS 1.6
+      # 8️⃣ INSTALL VANILLA HLDS / CS 1.6
       # ============================================================
 
-      - name: "1️⃣2️⃣ 📥 Install Vanilla CS 1.6 HLDS"
+      - name: "8️⃣ 🎮 Install Vanilla Counter-Strike 1.6 Server"
         shell: bash
         run: |
           set -Eeuo pipefail
 
-          echo
           echo "=============================================================="
-          echo "📥 INSTALLING VANILLA CS 1.6 HLDS"
+          echo "🎮 INSTALLING VANILLA HLDS"
           echo "=============================================================="
-          echo
-
-          echo "📂 Installation directory:"
-          echo "   $CS_INSTALL_DIR"
 
           sudo mkdir -p "$CS_INSTALL_DIR"
-
-          sudo chown \
-            "$USER:$USER" \
-            "$CS_INSTALL_DIR"
-
-          cd "$CS_INSTALL_DIR"
-
-          echo
-          echo "⬇️ Running SteamCMD..."
+          sudo chown "$USER:$USER" "$CS_INSTALL_DIR"
 
           steamcmd \
             +force_install_dir "$CS_INSTALL_DIR" \
@@ -868,894 +856,547 @@ jobs:
             +app_update 90 validate \
             +quit
 
-          echo
-          echo "🔎 Installation verification..."
-
-          if [ ! -f "$CS_INSTALL_DIR/hlds_run" ]; then
+          if [[ ! -x "$CS_INSTALL_DIR/hlds_run" ]]; then
             echo "❌ hlds_run not found."
             exit 1
           fi
 
-          if [ ! -d "$CS_INSTALL_DIR/cstrike" ]; then
+          if [[ ! -x "$CS_INSTALL_DIR/hlds_linux" ]]; then
+            echo "❌ hlds_linux not found."
+            exit 1
+          fi
+
+          if [[ ! -d "$CS_INSTALL_DIR/cstrike" ]]; then
             echo "❌ cstrike directory not found."
             exit 1
           fi
 
-          chmod +x "$CS_INSTALL_DIR/hlds_run" || true
-
-          echo "   ✅ hlds_run"
-          echo "   ✅ cstrike/"
           echo
-
-          echo "📂 HLDS root:"
-          find "$CS_INSTALL_DIR" \
-            -maxdepth 2 \
-            -type f |
-            sort |
-            head -n 150
+          echo "Installed size:"
+          du -sh "$CS_INSTALL_DIR"
 
           echo
-          echo "=============================================================="
-          echo "✅ VANILLA CS 1.6 INSTALLED"
-          echo "=============================================================="
+          echo "Disk:"
+          df -h /
+
+          echo
+          echo "✅ Vanilla HLDS installed."
+
 
       # ============================================================
-      # 13. BUILD SERVER CONFIG
+      # 9️⃣ VALIDATE START MAP
       # ============================================================
 
-      - name: "1️⃣3️⃣ ⚙️ Configure Vanilla CS 1.6"
+      - name: "9️⃣ 🗺️ Validate Start Map"
         shell: bash
         env:
-          CS_HOSTNAME: ${{ inputs.hostname }}
-          CS_START_MAP: ${{ inputs.start_map }}
-          CS_MAXPLAYERS: ${{ inputs.maxplayers }}
-
-          CS_MP_ROUNDTIME: ${{ inputs.roundtime }}
-          CS_MP_FREEZETIME: ${{ inputs.freezetime }}
-          CS_MP_BUYTIME: ${{ inputs.buytime }}
-          CS_MP_STARTMONEY: ${{ inputs.startmoney }}
-
-          CS_MP_FRIENDLYFIRE: ${{ inputs.friendlyfire }}
-          CS_MP_FOOTSTEPS: ${{ inputs.footsteps }}
-          CS_MP_LIMITTEAMS: ${{ inputs.limitteams }}
-          CS_MP_AUTOTEAMBALANCE: ${{ inputs.autoteambalance }}
-          CS_MP_TKPUNISH: ${{ inputs.tkpunish }}
-          CS_MP_C4TIMER: ${{ inputs.c4timer }}
-
-          CS_FORCECHASecam: ${{ inputs.forcechasecam }}
-
-          CS_VOICEENABLE: ${{ inputs.voiceenable }}
-          CS_ALLTALK: ${{ inputs.alltalk }}
-
-          CS_SV_MAXRATE: ${{ inputs.maxrate }}
-          CS_SV_MINRATE: ${{ inputs.minrate }}
-          CS_SV_MAXUPDATERATE: ${{ inputs.maxupdaterate }}
-          CS_SV_MINUPDATERATE: ${{ inputs.minupdaterate }}
-          CS_SV_UNLAG: ${{ inputs.unlag }}
-          CS_SV_MAXUNLAG: ${{ inputs.maxunlag }}
-
-          CS_SYS_TICRATE: ${{ inputs.systicrate }}
-
-          CS_MP_LOGDETAIL: ${{ inputs.logdetail }}
-          CS_EXTRA_CVARS: ${{ inputs.extra_cvars }}
+          MAP_INPUT: ${{ inputs.start_map }}
 
         run: |
           set -Eeuo pipefail
 
-          SERVER_CFG="$CS_INSTALL_DIR/cstrike/server.cfg"
+          MAP_FILE="$CS_INSTALL_DIR/cstrike/maps/${MAP_INPUT}.bsp"
 
-          echo
-          echo "=============================================================="
-          echo "⚙️ BUILDING SERVER CONFIGURATION"
-          echo "=============================================================="
-          echo
+          if [[ ! -f "$MAP_FILE" ]]; then
+            echo "❌ Map does not exist:"
+            echo "   $MAP_INPUT"
+            echo
+            echo "Expected:"
+            echo "   $MAP_FILE"
+            exit 1
+          fi
+
+          echo "✅ Map found: $MAP_INPUT"
+
+
+      # ============================================================
+      # 🔟 GENERATE SERVER.CFG
+      # ============================================================
+
+      - name: "🔟 ⚙️ Generate Vanilla server.cfg"
+        shell: bash
+        env:
+          HOSTNAME_INPUT: ${{ inputs.hostname }}
+          ROUNDTIME_INPUT: ${{ inputs.roundtime }}
+          FREEZETIME_INPUT: ${{ inputs.freezetime }}
+          BUYTIME_INPUT: ${{ inputs.buytime }}
+          STARTMONEY_INPUT: ${{ inputs.startmoney }}
+          FRIENDLYFIRE_INPUT: ${{ inputs.friendlyfire }}
+          FOOTSTEPS_INPUT: ${{ inputs.footsteps }}
+          LIMITTEAMS_INPUT: ${{ inputs.limitteams }}
+          AUTOTEAMBALANCE_INPUT: ${{ inputs.autoteambalance }}
+          TKPUNISH_INPUT: ${{ inputs.tkpunish }}
+          C4TIMER_INPUT: ${{ inputs.c4timer }}
+          FORCECHASECAM_INPUT: ${{ inputs.forcechasecam }}
+          VOICEENABLE_INPUT: ${{ inputs.voiceenable }}
+          ALLTALK_INPUT: ${{ inputs.alltalk }}
+          MAXRATE_INPUT: ${{ inputs.maxrate }}
+          MINRATE_INPUT: ${{ inputs.minrate }}
+          MAXUPDATERATE_INPUT: ${{ inputs.maxupdaterate }}
+          MINUPDATERATE_INPUT: ${{ inputs.minupdaterate }}
+          UNLAG_INPUT: ${{ inputs.unlag }}
+          MAXUNLAG_INPUT: ${{ inputs.maxunlag }}
+          SYSTICRATE_INPUT: ${{ inputs.sys_ticrate }}
+          LOGDETAIL_INPUT: ${{ inputs.logdetail }}
+          EXTRA_CVARS_INPUT: ${{ inputs.extra_cvars }}
+
+        run: |
+          set -Eeuo pipefail
 
           bool_to_int() {
             case "$1" in
-              true|TRUE|True)
-                echo "1"
+              true)
+                printf '1'
                 ;;
-              false|FALSE|False)
-                echo "0"
+              false)
+                printf '0'
                 ;;
               *)
-                echo "$1"
+                echo "❌ Invalid boolean value: $1" >&2
+                return 1
                 ;;
             esac
           }
 
-          FF="$(bool_to_int "$CS_MP_FRIENDLYFIRE")"
-          FOOTSTEPS="$(bool_to_int "$CS_MP_FOOTSTEPS")"
-          AUTOTEAM="$(bool_to_int "$CS_MP_AUTOTEAMBALANCE")"
-          TKPUNISH="$(bool_to_int "$CS_MP_TKPUNISH")"
-          VOICE="$(bool_to_int "$CS_VOICEENABLE")"
-          ALLTALK_VALUE="$(bool_to_int "$CS_ALLTALK")"
-          UNLAG="$(bool_to_int "$CS_SV_UNLAG")"
+          FRIENDLYFIRE="$(bool_to_int "$FRIENDLYFIRE_INPUT")"
+          FOOTSTEPS="$(bool_to_int "$FOOTSTEPS_INPUT")"
+          AUTOTEAMBALANCE="$(bool_to_int "$AUTOTEAMBALANCE_INPUT")"
+          TKPUNISH="$(bool_to_int "$TKPUNISH_INPUT")"
+          VOICEENABLE="$(bool_to_int "$VOICEENABLE_INPUT")"
+          ALLTALK="$(bool_to_int "$ALLTALK_INPUT")"
+          UNLAG="$(bool_to_int "$UNLAG_INPUT")"
+
+          SERVER_CFG="$CS_INSTALL_DIR/cstrike/server.cfg"
 
           cat > "$SERVER_CFG" <<EOF
           // ============================================================
-          // Counter-Strike 1.6 Vanilla HLDS
+          // Counter-Strike 1.6 Vanilla
           // Generated by GitHub Actions
           // ============================================================
 
-          hostname "$CS_HOSTNAME"
+          hostname "$HOSTNAME_INPUT"
 
-          // ------------------------------------------------------------
-          // NETWORK
-          // ------------------------------------------------------------
+          // Fixed Playit origin
+          ip "$CS_IP"
+          port "$CS_PORT"
+          sv_lan 0
 
-          sv_lan "0"
-
-          // Playit Origin:
-          // UDP 127.0.0.1:27015
-
-          sv_maxrate "$CS_SV_MAXRATE"
-          sv_minrate "$CS_SV_MINRATE"
-
-          sv_maxupdaterate "$CS_SV_MAXUPDATERATE"
-          sv_minupdaterate "$CS_SV_MINUPDATERATE"
-
-          sv_unlag "$UNLAG"
-          sv_maxunlag "$CS_SV_MAXUNLAG"
-
-          sys_ticrate "$CS_SYS_TICRATE"
-
-          // ------------------------------------------------------------
-          // GAMEPLAY
-          // ------------------------------------------------------------
-
-          mp_roundtime "$CS_MP_ROUNDTIME"
-          mp_freezetime "$CS_MP_FREEZETIME"
-          mp_buytime "$CS_MP_BUYTIME"
-          mp_startmoney "$CS_MP_STARTMONEY"
-
-          mp_friendlyfire "$FF"
+          // Gameplay
+          mp_roundtime "$ROUNDTIME_INPUT"
+          mp_freezetime "$FREEZETIME_INPUT"
+          mp_buytime "$BUYTIME_INPUT"
+          mp_startmoney "$STARTMONEY_INPUT"
+          mp_friendlyfire "$FRIENDLYFIRE"
           mp_footsteps "$FOOTSTEPS"
-
-          mp_limitteams "$CS_MP_LIMITTEAMS"
-          mp_autoteambalance "$AUTOTEAM"
-
+          mp_limitteams "$LIMITTEAMS_INPUT"
+          mp_autoteambalance "$AUTOTEAMBALANCE"
           mp_tkpunish "$TKPUNISH"
-          mp_c4timer "$CS_MP_C4TIMER"
+          mp_c4timer "$C4TIMER_INPUT"
+          mp_forcechasecam "$FORCECHASECAM_INPUT"
 
-          // ------------------------------------------------------------
-          // SPECTATOR
-          // ------------------------------------------------------------
+          // Voice
+          sv_voiceenable "$VOICEENABLE"
+          sv_alltalk "$ALLTALK"
 
-          mp_forcechasecam "$CS_FORCECHASecam"
+          // Network
+          sv_maxrate "$MAXRATE_INPUT"
+          sv_minrate "$MINRATE_INPUT"
+          sv_maxupdaterate "$MAXUPDATERATE_INPUT"
+          sv_minupdaterate "$MINUPDATERATE_INPUT"
+          sv_unlag "$UNLAG"
+          sv_maxunlag "$MAXUNLAG_INPUT"
 
-          // ------------------------------------------------------------
-          // VOICE
-          // ------------------------------------------------------------
+          // Server
+          sys_ticrate "$SYSTICRATE_INPUT"
 
-          voice_enable "$VOICE"
-          sv_alltalk "$ALLTALK_VALUE"
-
-          // ------------------------------------------------------------
-          // SERVER
-          // ------------------------------------------------------------
-
-          pausable "0"
-
+          // Logging
           log "on"
-          mp_logdetail "$CS_MP_LOGDETAIL"
+          mp_logdetail "$LOGDETAIL_INPUT"
 
-          decalfrequency "60"
-
-          sv_allowupload "1"
+          // Standard Vanilla settings
+          pausable "0"
+          sv_cheats "0"
           sv_allowdownload "1"
-
+          sv_allowupload "1"
           sv_send_logos "1"
           sv_send_resources "1"
-
-          // ------------------------------------------------------------
-          // MISC
-          // ------------------------------------------------------------
-
-          sv_contact ""
-          sv_region "255"
-
-          // ============================================================
-          // END OF BASE CONFIG
-          // ============================================================
+          decalfrequency "60"
           EOF
 
-          # ------------------------------------------------------------
-          # Extra user CVars
-          # ------------------------------------------------------------
+          if [[ -n "$EXTRA_CVARS_INPUT" ]]; then
 
-          if [ -n "${CS_EXTRA_CVARS:-}" ]; then
+            IFS=';' read -ra CVARS <<< "$EXTRA_CVARS_INPUT"
 
-            echo >> "$SERVER_CFG"
-            echo "// ============================================================" >> "$SERVER_CFG"
-            echo "// USER EXTRA CVARS" >> "$SERVER_CFG"
-            echo "// ============================================================" >> "$SERVER_CFG"
+            {
+              echo
+              echo "// Advanced Vanilla CVars"
 
-            printf '%s\n' "$CS_EXTRA_CVARS" |
-              sed '/^[[:space:]]*$/d' |
-              while IFS= read -r line; do
-                printf '%s\n' "$line" >> "$SERVER_CFG"
+              for ENTRY in "${CVARS[@]}"; do
+
+                ENTRY="$(printf '%s' "$ENTRY" |
+                  sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+                [[ -z "$ENTRY" ]] && continue
+
+                printf '%s\n' "$ENTRY"
+
               done
+
+            } >> "$SERVER_CFG"
 
           fi
 
           chmod 0644 "$SERVER_CFG"
 
-          echo
-          echo "📄 Generated server.cfg:"
-          echo "──────────────────────────────────────────────────────────────"
+          echo "=============================================================="
+          echo "📄 server.cfg"
+          echo "=============================================================="
 
           cat "$SERVER_CFG"
 
-          echo
-          echo "=============================================================="
-          echo "✅ SERVER CONFIGURATION COMPLETE"
           echo "=============================================================="
 
+
       # ============================================================
-      # 14. VALIDATE CS ORIGIN PORT
+      # 1️⃣1️⃣ CHECK ORIGIN PORT
       # ============================================================
 
-      - name: "1️⃣4️⃣ 🔌 Validate CS Origin"
+      - name: "1️⃣1️⃣ 🔌 Check Origin UDP Port"
         shell: bash
         run: |
           set -Eeuo pipefail
 
-          echo
-          echo "=============================================================="
-          echo "🔌 CS ORIGIN VALIDATION"
-          echo "=============================================================="
-          echo
-
-          echo "Protocol : UDP"
-          echo "Address  : $CS_IP"
-          echo "Port     : $CS_PORT"
-          echo
-          echo "Playit tunnel must point to:"
-          echo "   UDP $CS_IP:$CS_PORT"
-          echo
-
-          if sudo ss -lun |
+          if ss -H -lun |
             awk '{print $5}' |
             grep -Eq "(^|:)${CS_PORT}$"; then
 
-            echo "❌ UDP port $CS_PORT is already occupied."
-            sudo ss -lunp || true
+            echo "❌ UDP $CS_PORT is already occupied."
+            echo
+            ss -lunp || true
             exit 1
           fi
 
           echo "✅ UDP $CS_PORT is available."
 
+
       # ============================================================
-      # 15. START HLDS
+      # 1️⃣2️⃣ START HLDS + READINESS CHECK + RUNTIME MONITOR
       # ============================================================
 
-      - name: "1️⃣5️⃣ 🚀 Start Vanilla CS 1.6"
+      - name: "1️⃣2️⃣ 🚀 Start Vanilla HLDS"
         shell: bash
         env:
-          CS_START_MAP: ${{ inputs.start_map }}
-          CS_MAXPLAYERS: ${{ inputs.maxplayers }}
+          MAP_INPUT: ${{ inputs.start_map }}
+          MAXPLAYERS_INPUT: ${{ inputs.maxplayers }}
+
         run: |
           set -Eeuo pipefail
-
-          echo
-          echo "=============================================================="
-          echo "🚀 STARTING VANILLA CS 1.6"
-          echo "=============================================================="
-          echo
 
           cd "$CS_INSTALL_DIR"
 
           LOG_FILE="$CS_INSTALL_DIR/hlds-console.log"
           PID_FILE="$CS_INSTALL_DIR/hlds.pid"
 
-          : > "$LOG_FILE"
-
-          echo "🎮 Game        : Counter-Strike 1.6"
-          echo "🗺️ Map         : $CS_START_MAP"
-          echo "👥 Max Players : $CS_MAXPLAYERS"
-          echo "🌐 Bind        : $CS_IP:$CS_PORT"
+          echo "=============================================================="
+          echo "🎮 STARTING COUNTER-STRIKE 1.6"
+          echo "=============================================================="
+          echo
+          echo "Game       : Counter-Strike 1.6"
+          echo "Map        : $MAP_INPUT"
+          echo "Players    : $MAXPLAYERS_INPUT"
+          echo "Origin     : $CS_IP:$CS_PORT"
+          echo "Protocol   : UDP"
+          echo "Runtime    : ${MAX_RUNTIME_MINUTES} minutes"
           echo
 
-          # HLDS is intentionally bound to localhost.
-          # Playit forwards external UDP traffic to this origin.
+          rm -f "$LOG_FILE" "$PID_FILE"
 
-          nohup ./hlds_run \
+          ./hlds_run \
             -game cstrike \
-            -console \
-            -norestart \
             -ip "$CS_IP" \
             -port "$CS_PORT" \
-            +maxplayers "$CS_MAXPLAYERS" \
-            +map "$CS_START_MAP" \
-            +sv_lan "0" \
+            +maxplayers "$MAXPLAYERS_INPUT" \
+            +map "$MAP_INPUT" \
+            +sv_lan 0 \
             > "$LOG_FILE" 2>&1 &
 
-          HLDS_PID=$!
+          HLDS_LAUNCHER_PID=$!
 
-          echo "$HLDS_PID" > "$PID_FILE"
+          echo "$HLDS_LAUNCHER_PID" > "$PID_FILE"
 
-          echo "🧩 HLDS launcher PID:"
-          echo "   $HLDS_PID"
+          echo "HLDS launcher PID: $HLDS_LAUNCHER_PID"
 
-          echo
-          echo "⏳ Waiting for UDP listener..."
+          # ----------------------------------------------------------
+          # Wait for HLDS to become ready.
+          # ----------------------------------------------------------
 
-          READY=0
+          HLDS_READY=0
 
-          for i in $(seq 1 45); do
+          for attempt in {1..45}; do
 
-            if sudo ss -lun |
+            if ss -H -lun |
               awk '{print $5}' |
               grep -Eq "(^|:)${CS_PORT}$"; then
 
-              READY=1
-              echo "   🟢 UDP $CS_PORT is listening."
+              HLDS_READY=1
+              echo "✅ HLDS is listening on UDP $CS_PORT."
               break
             fi
 
-            if ! kill -0 "$HLDS_PID" 2>/dev/null; then
-              echo "   🔴 HLDS launcher exited."
-              break
+            if ! kill -0 "$HLDS_LAUNCHER_PID" 2>/dev/null; then
+              echo "❌ HLDS launcher exited during startup."
+              echo
+              echo "Last 150 log lines:"
+              tail -n 150 "$LOG_FILE" || true
+              exit 1
             fi
 
-            echo "   ⏳ Waiting... ${i}/45"
+            echo "⏳ Waiting for HLDS ($attempt/45)..."
             sleep 1
 
           done
 
-          if [ "$READY" -ne 1 ]; then
+          if (( HLDS_READY == 0 )); then
+
+            echo "❌ HLDS did not open UDP $CS_PORT within 45 seconds."
 
             echo
-            echo "❌ HLDS failed to open UDP $CS_PORT."
+            echo "Last 200 log lines:"
+            tail -n 200 "$LOG_FILE" || true
 
-            echo
-            echo "📜 HLDS log:"
-            tail -n 250 "$LOG_FILE" || true
-
-            echo
-            echo "🔌 UDP sockets:"
-            sudo ss -lunp || true
+            kill -TERM "$HLDS_LAUNCHER_PID" 2>/dev/null || true
 
             exit 1
           fi
 
           echo
-          echo "🧩 HLDS processes:"
-          ps aux | grep -E '[h]lds|[s]team' || true
-
-          echo
-          echo "🔌 Listening socket:"
-          sudo ss -lunp |
-            grep -E ":${CS_PORT}([[:space:]]|$)" ||
-            true
-
-          echo
           echo "=============================================================="
-          echo "🟢 VANILLA CS 1.6 IS RUNNING"
+          echo "✅ HLDS READY"
           echo "=============================================================="
 
-      # ============================================================
-      # 16. VERIFY SERVER
-      # ============================================================
+          # ----------------------------------------------------------
+          # Runtime monitor.
+          # This avoids relying on timeout/tail PID semantics.
+          # ----------------------------------------------------------
 
-      - name: "1️⃣6️⃣ 🔎 Verify Playit + CS"
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-
-          echo
-          echo "=============================================================="
-          echo "🔎 FULL SERVER VERIFICATION"
-          echo "=============================================================="
-          echo
-
-          echo "🎮 PLAYIT:"
-          if sudo systemctl is-active --quiet playit; then
-            echo "   🟢 ACTIVE"
-          else
-            echo "   🔴 INACTIVE"
-            exit 1
-          fi
+          RUNTIME_SECONDS=$(( MAX_RUNTIME_MINUTES * 60 ))
+          START_EPOCH="$(date +%s)"
+          END_EPOCH=$(( START_EPOCH + RUNTIME_SECONDS ))
 
           echo
-          echo "🎮 HLDS:"
-          if [ -f "$CS_INSTALL_DIR/hlds.pid" ]; then
+          echo "⏱️ Runtime monitor started."
+          echo "   End timestamp: $END_EPOCH"
 
-            HLDS_PID="$(cat "$CS_INSTALL_DIR/hlds.pid")"
+          while true; do
 
-            if kill -0 "$HLDS_PID" 2>/dev/null; then
-              echo "   🟢 PID $HLDS_PID is alive."
-            else
-              echo "   🔴 PID $HLDS_PID is not alive."
+            NOW_EPOCH="$(date +%s)"
+
+            # --------------------------------------------------------
+            # HLDS exited unexpectedly.
+            # --------------------------------------------------------
+
+            if ! kill -0 "$HLDS_LAUNCHER_PID" 2>/dev/null; then
+
+              echo "❌ HLDS exited unexpectedly."
+
+              echo
+              echo "Last 200 log lines:"
+              tail -n 200 "$LOG_FILE" || true
+
               exit 1
             fi
 
-          else
-            echo "   🔴 PID file missing."
+            # --------------------------------------------------------
+            # Planned runtime reached.
+            # --------------------------------------------------------
+
+            if (( NOW_EPOCH >= END_EPOCH )); then
+
+              echo "✅ Planned runtime reached."
+
+              break
+            fi
+
+            REMAINING=$(( END_EPOCH - NOW_EPOCH ))
+
+            if (( REMAINING > 300 )); then
+              sleep 30
+            else
+              sleep 5
+            fi
+
+          done
+
+          # ----------------------------------------------------------
+          # Graceful shutdown.
+          # ----------------------------------------------------------
+
+          echo "🛑 Sending SIGTERM to HLDS launcher..."
+
+          kill -TERM "$HLDS_LAUNCHER_PID" 2>/dev/null || true
+
+          for attempt in {1..10}; do
+
+            if ! kill -0 "$HLDS_LAUNCHER_PID" 2>/dev/null; then
+              echo "✅ HLDS stopped gracefully."
+              exit 0
+            fi
+
+            sleep 1
+
+          done
+
+          echo "⚠️ HLDS did not stop after SIGTERM."
+
+          kill -KILL "$HLDS_LAUNCHER_PID" 2>/dev/null || true
+
+          sleep 2
+
+          if kill -0 "$HLDS_LAUNCHER_PID" 2>/dev/null; then
+            echo "❌ Unable to terminate HLDS launcher."
             exit 1
           fi
 
-          echo
-          echo "🔌 UDP:"
-          if sudo ss -lun |
-            awk '{print $5}' |
-            grep -Eq "(^|:)${CS_PORT}$"; then
+          echo "✅ HLDS terminated."
 
-            echo "   🟢 UDP $CS_PORT LISTENING"
-
-          else
-
-            echo "   🔴 UDP $CS_PORT NOT LISTENING"
-            exit 1
-
-          fi
-
-          echo
-          echo "📜 HLDS log:"
-          tail -n 100 \
-            "$CS_INSTALL_DIR/hlds-console.log" ||
-            true
-
-          echo
-          echo "📜 Playit journal:"
-          sudo journalctl \
-            -u playit \
-            --no-pager \
-            -n 100 \
-            -o short-iso ||
-            true
-
-          echo
-          echo "=============================================================="
-          echo "🟢 PLAYIT + CS 1.6 ARE RUNNING"
-          echo "=============================================================="
 
       # ============================================================
-      # 17. RUNTIME MONITOR
+      # 1️⃣3️⃣ CLEANUP
       # ============================================================
 
-      - name: "1️⃣7️⃣ ⏱️ Runtime Monitor"
+      - name: "1️⃣3️⃣ 🧹 Cleanup"
+        if: always()
         shell: bash
         run: |
-          set -Eeuo pipefail
+          set +e
 
-          MAX_RUNTIME_SECONDS=$((MAX_RUNTIME_MINUTES * 60))
-          CHECK_INTERVAL="$MONITOR_INTERVAL_SECONDS"
-
-          START_EPOCH="$(date +%s)"
-
-          CS_PID_FILE="$CS_INSTALL_DIR/hlds.pid"
-          CS_LOG_FILE="$CS_INSTALL_DIR/hlds-console.log"
-
-          echo
           echo "=============================================================="
-          echo "⏱️ RUNTIME MONITOR"
+          echo "🧹 CLEANUP"
           echo "=============================================================="
-          echo
 
-          echo "🎮 Counter-Strike:"
-          echo "   Origin      : UDP $CS_IP:$CS_PORT"
-          echo "   Map         : ${{ inputs.start_map }}"
-          echo "   Max Players : ${{ inputs.maxplayers }}"
-          echo
+          # ----------------------------------------------------------
+          # Stop HLDS using recorded launcher PID.
+          # ----------------------------------------------------------
 
-          echo "🎮 Playit:"
-          echo "   Origin      : UDP $CS_IP:$CS_PORT"
-          echo
+          if [[ -f "$CS_INSTALL_DIR/hlds.pid" ]]; then
 
-          echo "⏱️ Runtime:"
-          echo "   GitHub limit : 360 minutes"
-          echo "   Server       : $MAX_RUNTIME_MINUTES minutes"
-          echo "   Safety       : $((360 - MAX_RUNTIME_MINUTES)) minutes"
-          echo
+            HLDS_PID="$(cat "$CS_INSTALL_DIR/hlds.pid" 2>/dev/null)"
 
-          cleanup() {
+            if [[ "$HLDS_PID" =~ ^[0-9]+$ ]]; then
 
-            set +e
+              echo "HLDS launcher PID: $HLDS_PID"
 
-            echo
-            echo "=============================================================="
-            echo "🧹 CLEANUP"
-            echo "=============================================================="
-            echo
+              if kill -0 "$HLDS_PID" 2>/dev/null; then
 
-            # --------------------------------------------------------
-            # Stop HLDS
-            # --------------------------------------------------------
+                kill -TERM "$HLDS_PID" 2>/dev/null
 
-            echo "🛑 Stopping HLDS..."
-
-            if [ -f "$CS_PID_FILE" ]; then
-
-              HLDS_PID="$(cat "$CS_PID_FILE" 2>/dev/null || true)"
-
-              if [ -n "${HLDS_PID:-}" ] &&
-                 kill -0 "$HLDS_PID" 2>/dev/null; then
-
-                echo "   Sending TERM to PID $HLDS_PID..."
-                kill -TERM "$HLDS_PID" 2>/dev/null || true
-
-                for _ in $(seq 1 10); do
-
-                  if ! kill -0 "$HLDS_PID" 2>/dev/null; then
-                    break
-                  fi
-
+                for _ in {1..5}; do
+                  kill -0 "$HLDS_PID" 2>/dev/null || break
                   sleep 1
-
                 done
 
                 if kill -0 "$HLDS_PID" 2>/dev/null; then
-                  echo "   Sending KILL to PID $HLDS_PID..."
-                  kill -KILL "$HLDS_PID" 2>/dev/null || true
+                  kill -KILL "$HLDS_PID" 2>/dev/null
                 fi
 
               fi
 
             fi
 
-            # --------------------------------------------------------
-            # Fallback only for the exact HLDS installation path.
-            # --------------------------------------------------------
+          fi
 
-            pkill -TERM -f \
-              "$CS_INSTALL_DIR/hlds_linux" \
-              2>/dev/null ||
-              true
+          # ----------------------------------------------------------
+          # Fallback: stop only HLDS processes from this installation.
+          # ----------------------------------------------------------
 
-            sleep 2
+          pkill -TERM -f "$CS_INSTALL_DIR/hlds_linux" 2>/dev/null
+          pkill -TERM -f "$CS_INSTALL_DIR/hlds_run" 2>/dev/null
 
-            pkill -KILL -f \
-              "$CS_INSTALL_DIR/hlds_linux" \
-              2>/dev/null ||
-              true
+          sleep 2
 
-            # --------------------------------------------------------
-            # Stop Playit
-            # --------------------------------------------------------
+          pkill -KILL -f "$CS_INSTALL_DIR/hlds_linux" 2>/dev/null
+          pkill -KILL -f "$CS_INSTALL_DIR/hlds_run" 2>/dev/null
 
-            echo
-            echo "🛑 Stopping Playit..."
+          # ----------------------------------------------------------
+          # Stop Playit.
+          # ----------------------------------------------------------
 
-            sudo systemctl stop playit \
-              2>/dev/null ||
-              true
+          sudo systemctl stop playit 2>/dev/null
 
-            # --------------------------------------------------------
-            # Final diagnostics
-            # --------------------------------------------------------
+          echo
+          echo "🎮 Playit:"
+          sudo systemctl status playit \
+            --no-pager \
+            --full \
+            2>/dev/null || true
 
-            echo
-            echo "📊 Final Playit state:"
-            sudo systemctl status playit \
-              --no-pager \
-              --full \
-              2>&1 ||
-              true
+          echo
+          echo "🔌 UDP sockets:"
+          ss -lunp || true
 
-            echo
-            echo "🔌 Final UDP sockets:"
-            sudo ss -lunp ||
-              true
+          echo
+          echo "🎮 HLDS processes:"
+          ps aux | grep -E '[h]lds_(run|linux)' || true
 
-            echo
-            echo "🎮 Final HLDS processes:"
-            ps aux | grep -E '[h]lds|[s]team' ||
-              true
+          echo
+          echo "=============================================================="
+          echo "🧹 CLEANUP COMPLETE"
+          echo "=============================================================="
 
-            echo
-            echo "📜 Final HLDS log:"
-            tail -n 250 "$CS_LOG_FILE" \
-              2>/dev/null ||
-              true
-
-            echo
-            echo "📜 Final Playit log:"
-            sudo journalctl \
-              -u playit \
-              --no-pager \
-              -n 250 \
-              -o short-iso \
-              2>/dev/null ||
-              true
-
-            echo
-            echo "=============================================================="
-            echo "🧹 CLEANUP COMPLETE"
-            echo "=============================================================="
-          }
-
-          trap cleanup EXIT INT TERM
-
-          while true; do
-
-            NOW_EPOCH="$(date +%s)"
-            ELAPSED="$((NOW_EPOCH - START_EPOCH))"
-            REMAINING="$((MAX_RUNTIME_SECONDS - ELAPSED))"
-
-            ELAPSED_MINUTES="$((ELAPSED / 60))"
-            ELAPSED_SECONDS="$((ELAPSED % 60))"
-
-            echo
-            echo "──────────────────────────────────────────────────────────────"
-
-            printf \
-              '⏱️ Runtime: %02d:%02d\n' \
-              "$ELAPSED_MINUTES" \
-              "$ELAPSED_SECONDS"
-
-            if [ "$REMAINING" -gt 0 ]; then
-
-              REMAINING_MINUTES="$((REMAINING / 60))"
-              REMAINING_SECONDS="$((REMAINING % 60))"
-
-              printf \
-                '   ⏳ Until shutdown: %02d:%02d\n' \
-                "$REMAINING_MINUTES" \
-                "$REMAINING_SECONDS"
-
-            fi
-
-            # --------------------------------------------------------
-            # Playit health
-            # --------------------------------------------------------
-
-            echo
-            echo "🎮 Playit:"
-
-            if sudo systemctl is-active --quiet playit; then
-
-              echo "   🟢 ACTIVE"
-
-            else
-
-              echo "   🔴 INACTIVE"
-
-              sudo journalctl \
-                -u playit \
-                --no-pager \
-                -n 150 \
-                -o short-iso \
-                || true
-
-              exit 1
-
-            fi
-
-            # --------------------------------------------------------
-            # HLDS process health
-            # --------------------------------------------------------
-
-            echo
-            echo "🎮 Counter-Strike:"
-
-            if [ ! -f "$CS_PID_FILE" ]; then
-
-              echo "   🔴 HLDS PID file missing."
-              exit 1
-
-            fi
-
-            HLDS_PID="$(cat "$CS_PID_FILE" 2>/dev/null || true)"
-
-            if [ -z "${HLDS_PID:-}" ]; then
-
-              echo "   🔴 HLDS PID is empty."
-              exit 1
-
-            fi
-
-            if kill -0 "$HLDS_PID" 2>/dev/null; then
-
-              echo "   🟢 HLDS PID $HLDS_PID is alive."
-
-            else
-
-              echo "   🔴 HLDS PID $HLDS_PID is dead."
-
-              echo
-              echo "📜 HLDS log:"
-              tail -n 250 "$CS_LOG_FILE" ||
-                true
-
-              exit 1
-
-            fi
-
-            # --------------------------------------------------------
-            # UDP port health
-            # --------------------------------------------------------
-
-            echo
-            echo "🔌 UDP Origin:"
-
-            if sudo ss -lun |
-              awk '{print $5}' |
-              grep -Eq "(^|:)${CS_PORT}$"; then
-
-              echo "   🟢 UDP $CS_IP:$CS_PORT LISTENING"
-
-            else
-
-              echo "   🔴 UDP $CS_IP:$CS_PORT NOT LISTENING"
-
-              echo
-              echo "📜 HLDS log:"
-              tail -n 250 "$CS_LOG_FILE" ||
-                true
-
-              exit 1
-
-            fi
-
-            # --------------------------------------------------------
-            # Periodic diagnostics
-            # --------------------------------------------------------
-
-            echo
-            echo "🧩 Processes:"
-            ps aux | grep -E '[h]lds|[s]team' ||
-              true
-
-            echo
-            echo "🔌 UDP sockets:"
-            sudo ss -lunp ||
-              true
-
-            # --------------------------------------------------------
-            # Planned shutdown
-            # --------------------------------------------------------
-
-            if [ "$ELAPSED" -ge "$MAX_RUNTIME_SECONDS" ]; then
-
-              echo
-              echo "=============================================================="
-              echo "🛑 PLANNED SERVER SHUTDOWN"
-              echo "=============================================================="
-              echo
-
-              echo "⏱️ Runtime threshold reached."
-              echo "🧹 Graceful cleanup will begin."
-
-              exit 0
-
-            fi
-
-            sleep "$CHECK_INTERVAL"
-
-          done
 
       # ============================================================
-      # 18. FAILURE DIAGNOSTICS
+      # 1️⃣4️⃣ FINAL FAILURE LOG
       # ============================================================
 
-      - name: "1️⃣8️⃣ 🧪 Failure Diagnostics"
+      - name: "1️⃣4️⃣ 📜 Show Diagnostic Logs On Failure"
         if: failure()
         shell: bash
         run: |
           set +e
 
-          echo
           echo "=============================================================="
-          echo "🧪 FINAL FAILURE DIAGNOSTICS"
+          echo "📜 FAILURE DIAGNOSTICS"
           echo "=============================================================="
-          echo
 
-          echo "🎮 PLAYIT STATUS:"
+          echo
+          echo "---------------- PLAYIT SERVICE ----------------"
+
           sudo systemctl status playit \
             --no-pager \
-            --full \
-            2>&1 ||
-            true
+            --full || true
 
           echo
-          echo "📜 PLAYIT JOURNAL:"
+          echo "---------------- PLAYIT JOURNAL ----------------"
+
           sudo journalctl \
             -u playit \
             --no-pager \
-            -n 500 \
-            -o short-iso \
-            2>&1 ||
-            true
+            -n 250 || true
 
           echo
-          echo "🎮 HLDS PROCESSES:"
-          ps aux | grep -E '[h]lds|[s]team' ||
-            true
+          echo "---------------- HLDS LOG ----------------"
+
+          if [[ -f "$CS_INSTALL_DIR/hlds-console.log" ]]; then
+            tail -n 250 \
+              "$CS_INSTALL_DIR/hlds-console.log"
+          else
+            echo "HLDS log file does not exist."
+          fi
 
           echo
-          echo "🔌 NETWORK:"
-          ip addr ||
-            true
+          echo "---------------- UDP SOCKETS ----------------"
+
+          ss -lunp || true
 
           echo
-          ip route ||
-            true
+          echo "---------------- PROCESSES ----------------"
+
+          ps aux | grep -E '[p]layit|[h]lds_(run|linux)' || true
 
           echo
-          sudo ss -lntup ||
-            true
+          echo "---------------- DISK ----------------"
+
+          df -h / || true
 
           echo
-          echo "📜 HLDS CONSOLE:"
-          tail -n 500 \
-            "$CS_INSTALL_DIR/hlds-console.log" \
-            2>&1 ||
-            true
-
-          echo
-          echo "📄 SERVER CFG:"
-          cat \
-            "$CS_INSTALL_DIR/cstrike/server.cfg" \
-            2>&1 ||
-            true
-
-          echo
-          echo "📂 CS FILES:"
-          find \
-            "$CS_INSTALL_DIR/cstrike" \
-            -maxdepth 2 \
-            -type f \
-            -printf '   %p\n' \
-            2>/dev/null |
-            head -n 300 ||
-            true
-
-          echo
-          echo "=============================================================="
-          echo "🛑 FAILURE DIAGNOSTICS COMPLETE"
-          echo "=============================================================="
-
-      # ============================================================
-      # 19. SUCCESS SUMMARY
-      # ============================================================
-
-      - name: "1️⃣9️⃣ ✅ Final Summary"
-        if: success()
-        shell: bash
-        run: |
-          echo
-          echo "=============================================================="
-          echo "🎮 SESSION COMPLETE"
-          echo "=============================================================="
-          echo
-
-          echo "🎮 PLAYIT:"
-          echo "   ✅ Authenticated"
-          echo "   ✅ Running"
-          echo "   ✅ Monitored"
-
-          echo
-          echo "🎮 COUNTER-STRIKE 1.6:"
-          echo "   ✅ Vanilla HLDS"
-          echo "   ✅ Map       : ${{ inputs.start_map }}"
-          echo "   ✅ MaxPlayers: ${{ inputs.maxplayers }}"
-          echo "   ✅ Origin    : UDP $CS_IP:$CS_PORT"
-
-          echo
-          echo "🌐 PLAYIT TUNNEL:"
-          echo "   Protocol : UDP"
-          echo "   Origin   : $CS_IP:$CS_PORT"
-
-          echo
-          echo "⏱️ RUNTIME:"
-          echo "   GitHub limit : 360 minutes"
-          echo "   Server limit : $MAX_RUNTIME_MINUTES minutes"
-          echo "   Safety       : $((360 - MAX_RUNTIME_MINUTES)) minutes"
-
-          echo
-          echo "🔐 AUTHENTICATION:"
-          echo "   GitHub Secret: PLAYIT_SECRET_KEY"
-          echo "   Value        : [REDACTED]"
-
-          echo
-          echo "📜 LOGS:"
-          echo "   HLDS   : $CS_INSTALL_DIR/hlds-console.log"
-          echo "   CS     : $CS_INSTALL_DIR/cstrike/logs/"
-          echo "   Playit : systemd journal"
-
-          echo
-          echo "=============================================================="
-          echo "🟢 PLAYIT + VANILLA CS 1.6 SESSION FINISHED"
           echo "=============================================================="
