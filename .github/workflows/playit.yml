@@ -216,8 +216,6 @@ on:
 # ================================================================
 # 🔒 CONCURRENCY
 # ================================================================
-# جلوگیری از اجرای هم‌زمان دو Agent با یک Playit Secret.
-# ================================================================
 
 concurrency:
   group: "cs16-playit-server"
@@ -232,7 +230,7 @@ jobs:
 
     runs-on: ubuntu-24.04
 
-    # GitHub-hosted runner hard limit.
+    # GitHub-hosted runner hard limit
     timeout-minutes: 360
 
     permissions:
@@ -252,14 +250,9 @@ jobs:
       # ============================================================
 
       CS_INSTALL_DIR: "/opt/cs16"
-      PLAYIT_CONFIG_DIR: "/etc/playit"
-      PLAYIT_CONFIG_FILE: "/etc/playit/playit.toml"
 
       # ============================================================
       # ⏱️ RUNTIME
-      # ============================================================
-      # 330 minutes runtime + ~30 minutes safety margin
-      # inside the 360-minute GitHub-hosted runner limit.
       # ============================================================
 
       MAX_RUNTIME_MINUTES: "330"
@@ -355,20 +348,31 @@ jobs:
             exit 1
           fi
 
-          if [[ "$HOSTNAME_INPUT" =~ [[:cntrl:]] ||
-                "$HOSTNAME_INPUT" == *'"'* ||
-                "$HOSTNAME_INPUT" == *'\'* ||
-                "$HOSTNAME_INPUT" == *';'* ]]; then
-            echo "❌ Hostname contains unsupported characters."
+          if [[ "$HOSTNAME_INPUT" =~ [[:cntrl:]] ]]; then
+            echo "❌ Hostname contains control characters."
             exit 1
           fi
+
+          case "$HOSTNAME_INPUT" in
+            *'"'*)
+              echo "❌ Hostname contains unsupported double quotes."
+              exit 1
+              ;;
+            *\\*)
+              echo "❌ Hostname contains unsupported backslashes."
+              exit 1
+              ;;
+            *';'*)
+              echo "❌ Hostname contains unsupported semicolons."
+              exit 1
+              ;;
+          esac
 
           # ----------------------------------------------------------
           # Map
           # ----------------------------------------------------------
 
-          if [[ -z "$MAP_INPUT" ||
-                ! "$MAP_INPUT" =~ ^[A-Za-z0-9_]+$ ]]; then
+          if [[ -z "$MAP_INPUT" || ! "$MAP_INPUT" =~ ^[A-Za-z0-9_]+$ ]]; then
             echo "❌ Invalid map name."
             echo "   Allowed: A-Z, a-z, 0-9 and _"
             exit 1
@@ -427,11 +431,23 @@ jobs:
             exit 1
           fi
 
-          if ! [[ "$MAXRATE_INPUT" =~ ^[0-9]+$ &&
-                  "$MINRATE_INPUT" =~ ^[0-9]+$ &&
-                  "$MAXUPDATERATE_INPUT" =~ ^[0-9]+$ &&
-                  "$MINUPDATERATE_INPUT" =~ ^[0-9]+$ ]]; then
-            echo "❌ Invalid network rate."
+          if ! [[ "$MAXRATE_INPUT" =~ ^[0-9]+$ ]]; then
+            echo "❌ Invalid sv_maxrate."
+            exit 1
+          fi
+
+          if ! [[ "$MINRATE_INPUT" =~ ^[0-9]+$ ]]; then
+            echo "❌ Invalid sv_minrate."
+            exit 1
+          fi
+
+          if ! [[ "$MAXUPDATERATE_INPUT" =~ ^[0-9]+$ ]]; then
+            echo "❌ Invalid sv_maxupdaterate."
+            exit 1
+          fi
+
+          if ! [[ "$MINUPDATERATE_INPUT" =~ ^[0-9]+$ ]]; then
+            echo "❌ Invalid sv_minupdaterate."
             exit 1
           fi
 
@@ -459,17 +475,20 @@ jobs:
           # Semantic ranges
           # ----------------------------------------------------------
 
-          if (( $(awk -v v="$ROUNDTIME_INPUT" 'BEGIN {print (v < 1 || v > 9)}') )); then
+          if ! awk -v v="$ROUNDTIME_INPUT" \
+            'BEGIN { exit !(v >= 1 && v <= 9) }'; then
             echo "❌ Round Time must be between 1 and 9 minutes."
             exit 1
           fi
 
-          if (( $(awk -v v="$FREEZETIME_INPUT" 'BEGIN {print (v < 0 || v > 60)}') )); then
+          if ! awk -v v="$FREEZETIME_INPUT" \
+            'BEGIN { exit !(v >= 0 && v <= 60) }'; then
             echo "❌ Freeze Time must be between 0 and 60 seconds."
             exit 1
           fi
 
-          if (( $(awk -v v="$BUYTIME_INPUT" 'BEGIN {print (v < 0 || v > 9)}') )); then
+          if ! awk -v v="$BUYTIME_INPUT" \
+            'BEGIN { exit !(v >= 0 && v <= 9) }'; then
             echo "❌ Buy Time must be between 0 and 9 minutes."
             exit 1
           fi
@@ -506,7 +525,8 @@ jobs:
             exit 1
           fi
 
-          if (( $(awk -v v="$MAXUNLAG_INPUT" 'BEGIN {print (v < 0 || v > 1)}') )); then
+          if ! awk -v v="$MAXUNLAG_INPUT" \
+            'BEGIN { exit !(v >= 0 && v <= 1) }'; then
             echo "❌ sv_maxunlag must be between 0 and 1 second."
             exit 1
           fi
@@ -522,7 +542,14 @@ jobs:
 
           if [[ -n "$EXTRA_CVARS_INPUT" ]]; then
 
-            IFS=';' read -ra CVARS <<< "$EXTRA_CVARS_INPUT"
+            IFS=';' read -r -a CVARS <<< "$EXTRA_CVARS_INPUT"
+
+            # Keep the semicolon-containing regex in a variable.
+            # This prevents Bash from interpreting ';' as a command
+            # separator while parsing [[ ... =~ ... ]].
+            CVAR_REGEX='^(mp_[A-Za-z0-9_]+|sv_[A-Za-z0-9_]+|allow_spectators|decalfrequency|edgefriction|host_framerate|pausable|log)[[:space:]]+[^[:cntrl:];[:space:]]+$'
+
+            DENIED_COMMAND_REGEX='(^|[[:space:]])(exec|quit|exit|alias|bind|unbind|rcon|changelevel|map|restart|shutdown|writeid|writeip|_restart)([[:space:]]|$)'
 
             for ENTRY in "${CVARS[@]}"; do
 
@@ -541,36 +568,32 @@ jobs:
                 exit 1
               fi
 
-              if [[ "$ENTRY" == *'"'* ||
-                    "$ENTRY" == *"'"* ||
-                    "$ENTRY" == *'\'* ]]; then
-                echo "❌ Advanced CVar contains unsupported quote characters."
-                exit 1
-              fi
+              case "$ENTRY" in
+                *'"'*|*"'"*|*\\*)
+                  echo "❌ Advanced CVar contains unsupported quote characters."
+                  exit 1
+                  ;;
+              esac
 
-              if [[ ! "$ENTRY" =~ ^(mp_[A-Za-z0-9_]+|sv_[A-Za-z0-9_]+|allow_spectators|decalfrequency|edgefriction|host_framerate|pausable|log)[[:space:]]+[^[:cntrl:];[:space:]]+$ ]]; then
+              if [[ ! "$ENTRY" =~ $CVAR_REGEX ]]; then
                 echo "❌ Invalid Advanced CVar:"
                 echo "   $ENTRY"
                 exit 1
               fi
 
-              if [[ "$ENTRY" =~ (^|[[:space:]])(exec|quit|exit|alias|bind|unbind|rcon|changelevel|map|restart|shutdown|writeid|writeip|_restart)([[:space:]]|$) ]]; then
+              if [[ "$ENTRY" =~ $DENIED_COMMAND_REGEX ]]; then
                 echo "❌ Server command is not allowed:"
                 echo "   $ENTRY"
                 exit 1
               fi
 
-              if [[ "$ENTRY" == *'&&'* ||
-                    "$ENTRY" == *'||'* ||
-                    "$ENTRY" == *'>>'* ||
-                    "$ENTRY" == *'>'* ||
-                    "$ENTRY" == *'<'* ||
-                    "$ENTRY" == *'$('* ||
-                    "$ENTRY" == *'`'* ]]; then
-                echo "❌ Unsupported command syntax in Advanced CVar:"
-                echo "   $ENTRY"
-                exit 1
-              fi
+              case "$ENTRY" in
+                *'&&'*|*'||'*|*'>>'*|*'>'*|*'<'*|*'$('*|*'`'*)
+                  echo "❌ Unsupported command syntax in Advanced CVar:"
+                  echo "   $ENTRY"
+                  exit 1
+                  ;;
+              esac
 
               CVAR_NAME="${ENTRY%%[[:space:]]*}"
 
@@ -586,7 +609,9 @@ jobs:
           fi
 
           echo
+          echo "=============================================================="
           echo "✅ Configuration is valid."
+          echo "=============================================================="
 
 
       # ============================================================
@@ -611,13 +636,17 @@ jobs:
             iproute2 \
             procps \
             steamcmd \
-            util-linux
+            util-linux \
+            awk \
+            sed
 
           command -v curl
           command -v gpg
           command -v ss
           command -v steamcmd
           command -v timeout
+          command -v awk
+          command -v sed
 
           echo
           echo "Architecture:"
@@ -626,7 +655,7 @@ jobs:
 
           echo
           echo "SteamCMD:"
-          steamcmd +quit
+          steamcmd +quit || true
 
           echo
           echo "✅ Dependencies installed."
@@ -684,6 +713,10 @@ jobs:
           sudo systemctl cat playit --no-pager
 
           echo
+          echo "Playit secret path:"
+          playit secret-path
+
+          echo
           echo "✅ Playit installed."
 
 
@@ -704,22 +737,46 @@ jobs:
             exit 1
           fi
 
-          if [[ "$PLAYIT_SECRET_KEY" =~ [[:cntrl:]] ]]; then
-            echo "❌ PLAYIT_SECRET_KEY contains unsupported control characters."
+          if [[ "$PLAYIT_SECRET_KEY" =~ [[:cntrl:][:space:]] ]]; then
+            echo "❌ PLAYIT_SECRET_KEY contains whitespace or control characters."
             exit 1
           fi
 
-          if [[ ! "$PLAYIT_SECRET_KEY" =~ ^[A-Za-z0-9_-]{32,256}$ ]]; then
-            echo "❌ PLAYIT_SECRET_KEY has an invalid format."
+          if (( ${#PLAYIT_SECRET_KEY} < 16 || ${#PLAYIT_SECRET_KEY} > 1024 )); then
+            echo "❌ PLAYIT_SECRET_KEY has an invalid length."
+            echo "   Expected: 16-1024 characters."
             exit 1
           fi
+
+          SECRET_PATH="$(playit secret-path)"
+
+          if [[ -z "$SECRET_PATH" ]]; then
+            echo "❌ Playit did not return a secret path."
+            exit 1
+          fi
+
+          if [[ "$SECRET_PATH" != /* ]]; then
+            echo "❌ Playit returned an invalid secret path:"
+            echo "   $SECRET_PATH"
+            exit 1
+          fi
+
+          if [[ "$SECRET_PATH" =~ [[:cntrl:]] ]]; then
+            echo "❌ Playit secret path contains control characters."
+            exit 1
+          fi
+
+          SECRET_DIR="$(dirname "$SECRET_PATH")"
+
+          echo "Playit secret path:"
+          echo "  $SECRET_PATH"
 
           sudo install \
             -d \
             -o playit \
             -g playit \
             -m 0750 \
-            "$PLAYIT_CONFIG_DIR"
+            "$SECRET_DIR"
 
           TMP_FILE="$(mktemp)"
 
@@ -729,27 +786,25 @@ jobs:
 
           trap cleanup_tmp EXIT
 
-          ESCAPED_SECRET="${PLAYIT_SECRET_KEY//\\/\\\\}"
-          ESCAPED_SECRET="${ESCAPED_SECRET//\"/\\\"}"
-
-          printf 'secret_key = "%s"\n' \
-            "$ESCAPED_SECRET" > "$TMP_FILE"
+          printf '%s\n' "$PLAYIT_SECRET_KEY" > "$TMP_FILE"
 
           sudo install \
             -o playit \
             -g playit \
             -m 0600 \
             "$TMP_FILE" \
-            "$PLAYIT_CONFIG_FILE"
+            "$SECRET_PATH"
 
           unset PLAYIT_SECRET_KEY
-          unset ESCAPED_SECRET
 
-          echo "✅ Playit secret configured."
-
+          echo
+          echo "Secret file:"
           sudo stat \
             -c 'Path=%n Owner=%U:%G Mode=%a Size=%s' \
-            "$PLAYIT_CONFIG_FILE"
+            "$SECRET_PATH"
+
+          echo
+          echo "✅ Playit secret configured."
 
 
       # ============================================================
@@ -779,8 +834,8 @@ jobs:
               continue
             fi
 
-            if ! sudo test -s "$PLAYIT_CONFIG_FILE"; then
-              echo "❌ Playit secret file disappeared."
+            if ! sudo test -s "$(playit secret-path)"; then
+              echo "❌ Playit secret file is missing or empty."
               exit 1
             fi
 
@@ -1025,7 +1080,7 @@ jobs:
 
           if [[ -n "$EXTRA_CVARS_INPUT" ]]; then
 
-            IFS=';' read -ra CVARS <<< "$EXTRA_CVARS_INPUT"
+            IFS=';' read -r -a CVARS <<< "$EXTRA_CVARS_INPUT"
 
             {
               echo
@@ -1067,8 +1122,10 @@ jobs:
           set -Eeuo pipefail
 
           if ss -H -lun |
-            awk '{print $5}' |
-            grep -Eq "(^|:)${CS_PORT}$"; then
+            awk -v port="$CS_PORT" '
+              $5 ~ (":" port "$") { found=1 }
+              END { exit !found }
+            '; then
 
             echo "❌ UDP $CS_PORT is already occupied."
             echo
@@ -1135,8 +1192,10 @@ jobs:
           for attempt in {1..45}; do
 
             if ss -H -lun |
-              awk '{print $5}' |
-              grep -Eq "(^|:)${CS_PORT}$"; then
+              awk -v port="$CS_PORT" '
+                $5 ~ (":" port "$") { found=1 }
+                END { exit !found }
+              '; then
 
               HLDS_READY=1
               echo "✅ HLDS is listening on UDP $CS_PORT."
@@ -1176,7 +1235,6 @@ jobs:
 
           # ----------------------------------------------------------
           # Runtime monitor.
-          # This avoids relying on timeout/tail PID semantics.
           # ----------------------------------------------------------
 
           RUNTIME_SECONDS=$(( MAX_RUNTIME_MINUTES * 60 ))
@@ -1192,12 +1250,26 @@ jobs:
             NOW_EPOCH="$(date +%s)"
 
             # --------------------------------------------------------
-            # HLDS exited unexpectedly.
+            # Detect dead or zombie launcher.
             # --------------------------------------------------------
 
             if ! kill -0 "$HLDS_LAUNCHER_PID" 2>/dev/null; then
 
               echo "❌ HLDS exited unexpectedly."
+
+              echo
+              echo "Last 200 log lines:"
+              tail -n 200 "$LOG_FILE" || true
+
+              exit 1
+            fi
+
+            HLDS_STATE="$(ps -p "$HLDS_LAUNCHER_PID" -o stat= 2>/dev/null |
+              tr -d '[:space:]' || true)"
+
+            if [[ "$HLDS_STATE" == Z* ]]; then
+
+              echo "❌ HLDS launcher became a zombie."
 
               echo
               echo "Last 200 log lines:"
@@ -1242,6 +1314,14 @@ jobs:
               exit 0
             fi
 
+            HLDS_STATE="$(ps -p "$HLDS_LAUNCHER_PID" -o stat= 2>/dev/null |
+              tr -d '[:space:]' || true)"
+
+            if [[ "$HLDS_STATE" == Z* ]]; then
+              echo "✅ HLDS launcher exited."
+              exit 0
+            fi
+
             sleep 1
 
           done
@@ -1253,8 +1333,15 @@ jobs:
           sleep 2
 
           if kill -0 "$HLDS_LAUNCHER_PID" 2>/dev/null; then
-            echo "❌ Unable to terminate HLDS launcher."
-            exit 1
+
+            HLDS_STATE="$(ps -p "$HLDS_LAUNCHER_PID" -o stat= 2>/dev/null |
+              tr -d '[:space:]' || true)"
+
+            if [[ "$HLDS_STATE" != Z* ]]; then
+              echo "❌ Unable to terminate HLDS launcher."
+              exit 1
+            fi
+
           fi
 
           echo "✅ HLDS terminated."
@@ -1291,12 +1378,27 @@ jobs:
                 kill -TERM "$HLDS_PID" 2>/dev/null
 
                 for _ in {1..5}; do
+
                   kill -0 "$HLDS_PID" 2>/dev/null || break
+
+                  HLDS_STATE="$(ps -p "$HLDS_PID" -o stat= 2>/dev/null |
+                    tr -d '[:space:]')"
+
+                  [[ "$HLDS_STATE" == Z* ]] && break
+
                   sleep 1
+
                 done
 
                 if kill -0 "$HLDS_PID" 2>/dev/null; then
-                  kill -KILL "$HLDS_PID" 2>/dev/null
+
+                  HLDS_STATE="$(ps -p "$HLDS_PID" -o stat= 2>/dev/null |
+                    tr -d '[:space:]')"
+
+                  if [[ "$HLDS_STATE" != Z* ]]; then
+                    kill -KILL "$HLDS_PID" 2>/dev/null
+                  fi
+
                 fi
 
               fi
@@ -1309,19 +1411,19 @@ jobs:
           # Fallback: stop only HLDS processes from this installation.
           # ----------------------------------------------------------
 
-          pkill -TERM -f "$CS_INSTALL_DIR/hlds_linux" 2>/dev/null
-          pkill -TERM -f "$CS_INSTALL_DIR/hlds_run" 2>/dev/null
+          pkill -TERM -f "$CS_INSTALL_DIR/hlds_linux" 2>/dev/null || true
+          pkill -TERM -f "$CS_INSTALL_DIR/hlds_run" 2>/dev/null || true
 
           sleep 2
 
-          pkill -KILL -f "$CS_INSTALL_DIR/hlds_linux" 2>/dev/null
-          pkill -KILL -f "$CS_INSTALL_DIR/hlds_run" 2>/dev/null
+          pkill -KILL -f "$CS_INSTALL_DIR/hlds_linux" 2>/dev/null || true
+          pkill -KILL -f "$CS_INSTALL_DIR/hlds_run" 2>/dev/null || true
 
           # ----------------------------------------------------------
           # Stop Playit.
           # ----------------------------------------------------------
 
-          sudo systemctl stop playit 2>/dev/null
+          sudo systemctl stop playit 2>/dev/null || true
 
           echo
           echo "🎮 Playit:"
@@ -1377,10 +1479,14 @@ jobs:
           echo "---------------- HLDS LOG ----------------"
 
           if [[ -f "$CS_INSTALL_DIR/hlds-console.log" ]]; then
+
             tail -n 250 \
               "$CS_INSTALL_DIR/hlds-console.log"
+
           else
+
             echo "HLDS log file does not exist."
+
           fi
 
           echo
