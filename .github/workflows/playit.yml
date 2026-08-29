@@ -636,9 +636,7 @@ jobs:
             iproute2 \
             procps \
             steamcmd \
-            util-linux \
-            awk \
-            sed
+            util-linux
 
           command -v curl
           command -v gpg
